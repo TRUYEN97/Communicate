@@ -109,6 +109,7 @@ public class Telnet implements ISender, IReadable, IConnect {
         return this.host;
     }
 
+    @Override
     public boolean isConnect() {
         return telnet.isConnected();
     }

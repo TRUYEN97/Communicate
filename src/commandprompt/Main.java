@@ -5,6 +5,7 @@
 package commandprompt;
 
 import Time.WaitTime.Class.TimeMs;
+import commandprompt.AbstractStream.SubClass.ReadStream;
 import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
 import commandprompt.Communicate.Cmd.Cmd;
 import commandprompt.Communicate.Comport.ComPort;
@@ -33,6 +34,7 @@ public class Main {
 
     @SuppressWarnings("empty-statement")
     private static void telnet(Scanner scanner) {
+        System.out.println("Telnet");
         Telnet telnet = new Telnet();
         while (!connect(scanner, telnet)) ;
         System.out.println(telnet.readAll(new TimeMs(100)));
@@ -48,17 +50,17 @@ public class Main {
     }
 
     private static boolean connect(Scanner scanner, IConnect telnet) {
-        String input;
         System.out.print("Input Host: ");
-        input = scanner.nextLine();
-        if (telnet.isConnect()) {
-            telnet.disConnect();
-        }
-        return telnet.connect(input, 23);
+        scanner.nextLine();
+        String host = scanner.nextLine();
+        System.out.print("Input baud rate or port: ");
+        int port = scanner.nextInt();
+        return telnet.connect(host, port);
     }
 
     private static void cmd(Scanner scanner) {
-        Cmd cmd = new Cmd(new ReadStreamOverTime());
+        System.out.println("Command line");
+        Cmd cmd = new Cmd(new ReadStream());
         while (scanner.hasNextLine()) {
             cmd.sendCommand(scanner.nextLine());
             String line;
@@ -66,14 +68,14 @@ public class Main {
                 System.out.print(line);
             }
         }
-        
+
     }
 
     @SuppressWarnings("empty-statement")
     private static void port(Scanner scanner) {
+        System.out.println("ComPort");
         ComPort comPort = new ComPort();
         while (!connect(scanner, comPort)) ;
-        System.out.println("Connected!");
         String input;
         while (scanner.hasNextLine()) {
             input = scanner.nextLine();

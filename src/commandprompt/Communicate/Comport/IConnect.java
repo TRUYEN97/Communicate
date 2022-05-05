@@ -11,6 +11,8 @@ package commandprompt.Communicate.Comport;
 public interface IConnect {
 
     boolean connect(String port, int baudrate);
+
     boolean disConnect();
+
     boolean isConnect();
 }
