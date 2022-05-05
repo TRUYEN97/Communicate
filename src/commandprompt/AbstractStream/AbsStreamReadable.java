@@ -26,6 +26,16 @@ public abstract class AbsStreamReadable implements IReadable {
         this.reader = reader;
     }
 
+    public boolean disConnect() {
+        try {
+            this.reader.close();
+            return true;
+        } catch (IOException ex) {
+            System.out.println(ex);
+            return false;
+        }
+    }
+
     public abstract AbsStreamReadable getReader();
 
     public void setReader(InputStream reader) {
@@ -33,7 +43,7 @@ public abstract class AbsStreamReadable implements IReadable {
     }
 
     public String readLine(ITimer time) {
-        return readUntil("\r", time);
+        return readUntil("\n", time);
     }
 
     @Override
@@ -44,28 +54,30 @@ public abstract class AbsStreamReadable implements IReadable {
     @Override
     public String readUntil(String regex, ITimer tiker) {
         StringBuffer result;
-        ITimer theEnd;
+        ITimer timer;
         try {
             result = new StringBuffer();
-            theEnd = new TimeS(5);
+            timer = new TimeS(5);
             char kiTu;
             while (tiker.onTime() && reader != null) {
                 if (reader.available() > 0) {
-                    kiTu = (char) reader.read();
+                    if ((kiTu = (char) reader.read()) == -1) {
+                        break;
+                    }
                     result.append(kiTu);
                     if (isKeyWord(result.toString(), regex)) {
                         break;
                     }
-                    theEnd.update();
+                    timer.update();
                     continue;
                 }
-                if (!theEnd.onTime()) {
+                if (!timer.onTime()) {
                     break;
                 }
             }
-            return result.toString().isEmpty() ? null : result.toString().trim();
+            return result.toString().isEmpty() ? null : result.toString();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.err.println(ex.getMessage());
         }
         return null;
     }
@@ -84,7 +96,7 @@ public abstract class AbsStreamReadable implements IReadable {
                 reader.read();
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.err.println(ex.getMessage());
         }
     }
 }

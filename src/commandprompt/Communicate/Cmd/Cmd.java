@@ -58,7 +58,7 @@ public class Cmd implements ISender, IReadable {
             this.reader.setReader(process.getInputStream());
             return true;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.err.println(ex);
             return false;
         }
     }

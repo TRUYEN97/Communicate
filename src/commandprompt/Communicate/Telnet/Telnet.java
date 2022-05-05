@@ -6,9 +6,11 @@ package commandprompt.Communicate.Telnet;
 
 import Time.WaitTime.ITimer;
 import commandprompt.AbstractStream.AbsStreamReadable;
-import commandprompt.AbstractStream.SubClass.ReadStreamOnTime;
+import commandprompt.AbstractStream.SubClass.ReadStream;
+import commandprompt.Communicate.Comport.IConnect;
 import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
+import java.io.IOException;
 import java.io.PrintStream;
 import org.apache.commons.net.telnet.TelnetClient;
 
@@ -16,39 +18,43 @@ import org.apache.commons.net.telnet.TelnetClient;
  *
  * @author Administrator
  */
-public class Telnet implements ISender, IReadable {
+public class Telnet implements ISender, IReadable, IConnect {
 
-    private TelnetClient telnet;
+    private final TelnetClient telnet;
     private PrintStream out;
-    private AbsStreamReadable input;
+    private final AbsStreamReadable input;
+    private String host;
 
-    public Telnet(String server) {
-        telnet = new TelnetClient();
-        this.input = new ReadStreamOnTime();
-//        for (int i = 0; i < 3; i++) {
-            try {
-                telnet.connect(server, 23);
-                input.setReader(telnet.getInputStream());
-                out = new PrintStream(telnet.getOutputStream());
-            } catch (Exception e) {
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-            }
-//        }
+    public Telnet() {
+        this.telnet = new TelnetClient();
+        this.input = new ReadStream();
     }
 
-    public Telnet(String server, AbsStreamReadable input) {
-        this(server);
-        this.input = input;
+    @Override
+    public boolean connect(String host, int port) {
+        try {
+            telnet.connect(host, port);
+            input.setReader(telnet.getInputStream());
+            out = new PrintStream(telnet.getOutputStream());
+            this.host = host;
+            return true;
+        } catch (IOException e) {
+            System.err.println(e);
+            return false;
+        }
     }
 
-    public boolean disconnect() {
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean disConnect() {
         try {
             telnet.disconnect();
             return true;
-        } catch (Exception e) {
+        } catch (IOException e) {
+            System.err.println(e);
             return false;
         }
     }
@@ -93,5 +99,17 @@ public class Telnet implements ISender, IReadable {
     @Override
     public String readUntil(String regex, ITimer tiker) {
         return input.readUntil(regex, tiker);
+    }
+
+    public int getPort() {
+        return telnet.getLocalPort();
+    }
+
+    public String getHost() {
+        return this.host;
+    }
+
+    public boolean isConnect() {
+        return telnet.isConnected();
     }
 }

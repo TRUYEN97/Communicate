@@ -12,15 +12,15 @@ import java.io.InputStream;
  *
  * @author Administrator
  */
-public class ReadStreamOnTime extends AbsStreamReadable {
+public class ReadStream extends AbsStreamReadable {
 
     private static final int MAX = Integer.MAX_VALUE;
 
-    public ReadStreamOnTime(InputStream reader) {
+    public ReadStream(InputStream reader) {
         super(reader);
     }
 
-    public ReadStreamOnTime() {
+    public ReadStream() {
     }
     
     @Override

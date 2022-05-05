@@ -6,47 +6,58 @@ package commandprompt.Communicate.Comport;
 
 import Time.WaitTime.ITimer;
 import commandprompt.AbstractStream.AbsStreamReadable;
-import commandprompt.AbstractStream.SubClass.ReadStreamOnTime;
+import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
 import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
+import java.awt.HeadlessException;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.comm.CommPortIdentifier;
+import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
+import javax.comm.UnsupportedCommOperationException;
 import javax.swing.JOptionPane;
 
-public class ComPort implements ISender, IReadable {
+public class ComPort implements ISender, IReadable, IConnect {
 
-    private Enumeration portList;
+    private final Enumeration portList;
     private CommPortIdentifier portId;
     private SerialPort serialPort;
     private BufferedWriter out;
-    private AbsStreamReadable input;
+    private final AbsStreamReadable input;
 
-    public ComPort(String port, int baudrate) {
+    public ComPort() {
         portList = CommPortIdentifier.getPortIdentifiers();
-        input = new ReadStreamOnTime();
+        input = new ReadStreamOverTime();
+    }
+
+    @Override
+    public final boolean connect(String port, int baudrate) {
         while (portList.hasMoreElements()) {
             portId = (CommPortIdentifier) portList.nextElement();
-            if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                if (portId.getName().equalsIgnoreCase(port)) {
-                    try {
-                        serialPort = (SerialPort) portId.open(port.toUpperCase(), 2000);
-                        serialPort.setSerialPortParams(baudrate,
-                                SerialPort.DATABITS_8,
-                                SerialPort.STOPBITS_1,
-                                SerialPort.PARITY_NONE);
-                        input.setReader(serialPort.getInputStream());
-                        out = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showConfirmDialog(null, String.format("Com port initialization failed\r\n%s-%s\r\n%s",
-                                port, baudrate, this.getClass().getName()));
-                    }
-                }
+            if (isPortSerial() && portId.getName().equalsIgnoreCase(port)) {
+                return setupConnect(port, baudrate);
             }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean disConnect() {
+        if (serialPort != null) {
+            serialPort.close();
+        }
+        try {
+            out.close();
+            out = null;
+            return input.disConnect();
+        } catch (IOException ex) {
+            System.err.println(ex);
+            return false;
         }
     }
 
@@ -62,12 +73,10 @@ public class ComPort implements ISender, IReadable {
             out.write(command);
             out.newLine();
             out.flush();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ex) {
-            }
+            Thread.sleep(500);
             return true;
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
+            System.err.println(ex);
             return false;
         }
     }
@@ -95,5 +104,37 @@ public class ComPort implements ISender, IReadable {
     @Override
     public String readUntil(String regex, ITimer tiker) {
         return input.readUntil(regex, tiker);
+    }
+
+    private boolean isPortSerial() {
+        return portId.getPortType() == CommPortIdentifier.PORT_SERIAL;
+    }
+
+    private boolean setupConnect(String port, int baudrate) throws HeadlessException {
+        try {
+            serialPort = (SerialPort) portId.open(port.toUpperCase(), 2000);
+            serialPort.setSerialPortParams(baudrate,
+                    SerialPort.DATABITS_8,
+                    SerialPort.STOPBITS_1,
+                    SerialPort.PARITY_NONE);
+            input.setReader(serialPort.getInputStream());
+            out = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+            return true;
+        } catch (IOException | PortInUseException | UnsupportedCommOperationException ex) {
+            try {
+                System.err.println(ex);
+                JOptionPane.showConfirmDialog(null, String.format("Com port initialization failed\r\n%s-%s\r\n%s",
+                        port, baudrate, this.getClass().getName()));
+                serialPort.close();
+                out.close();
+            } catch (IOException ex1) {
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isConnect() {
+        return out != null;
     }
 }

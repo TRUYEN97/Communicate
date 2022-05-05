@@ -5,9 +5,10 @@
 package commandprompt.AbstractStream.SubClass;
 
 import commandprompt.AbstractStream.AbsStreamReadable;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
 /**
  *
@@ -15,7 +16,7 @@ import java.util.Scanner;
  */
 public class ReadStreamOverTime extends AbsStreamReadable {
 
-    private Scanner scanner = null;
+    private BufferedReader scanner = null;
 
     public ReadStreamOverTime() {
         super();
@@ -28,15 +29,17 @@ public class ReadStreamOverTime extends AbsStreamReadable {
     @Override
     public void setReader(InputStream reader) {
         super.setReader(reader);
-        scanner = new Scanner(new InputStreamReader(this.reader));
+        scanner = new BufferedReader(new InputStreamReader(this.reader));
     }
 
     @Override
     public String readLine() {
-        if (scanner.hasNextLine()) {
-            return scanner.nextLine();
+        try {
+            return scanner.readLine();
+        } catch (IOException ex) {
+            System.err.println(ex);
+            return null;
         }
-        return null;
     }
 
     @Override
