@@ -4,7 +4,7 @@
  */
 package commandprompt.Communicate.Comport;
 
-import Time.WaitTime.ITimer;
+import Time.WaitTime.AbsTime;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
 import commandprompt.Communicate.IReadable;
@@ -14,8 +14,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.comm.CommPortIdentifier;
 import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
@@ -92,7 +90,7 @@ public class ComPort implements ISender, IReadable, IConnect {
     }
 
     @Override
-    public String readAll(ITimer tiker) {
+    public String readAll(AbsTime tiker) {
         return input.readAll(tiker);
     }
 
@@ -102,7 +100,7 @@ public class ComPort implements ISender, IReadable, IConnect {
     }
 
     @Override
-    public String readUntil(String regex, ITimer tiker) {
+    public String readUntil(String regex, AbsTime tiker) {
         return input.readUntil(regex, tiker);
     }
 

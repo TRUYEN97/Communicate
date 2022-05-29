@@ -4,9 +4,9 @@
  */
 package commandprompt.AbstractStream;
 
+import Time.WaitTime.AbsTime;
 import Time.WaitTime.Class.TimeS;
 import commandprompt.Communicate.IReadable;
-import Time.WaitTime.ITimer;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,19 +42,19 @@ public abstract class AbsStreamReadable implements IReadable {
         this.reader = reader;
     }
 
-    public String readLine(ITimer time) {
+    public String readLine(AbsTime time) {
         return readUntil("\n", time);
     }
 
     @Override
-    public String readAll(ITimer tiker) {
+    public String readAll(AbsTime tiker) {
         return readUntil(null, tiker);
     }
 
     @Override
-    public String readUntil(String regex, ITimer tiker) {
+    public String readUntil(String regex, AbsTime tiker) {
         StringBuffer result;
-        ITimer timer;
+        AbsTime timer;
         try {
             result = new StringBuffer();
             timer = new TimeS(5);

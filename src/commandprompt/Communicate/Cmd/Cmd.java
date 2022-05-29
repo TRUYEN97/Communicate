@@ -4,10 +4,10 @@
  */
 package commandprompt.Communicate.Cmd;
 
+import Time.WaitTime.AbsTime;
 import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
 import Time.WaitTime.Class.TimeS;
-import Time.WaitTime.ITimer;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import java.io.IOException;
 
@@ -41,7 +41,7 @@ public class Cmd implements ISender, IReadable {
         return false;
     }
 
-    public boolean pingUntilConnect(String url, ITimer timer) {
+    public boolean pingUntilConnect(String url, AbsTime timer) {
         String cmd = String.format("ping %s -t", url);
         if (sendCommand(cmd)) {
             return reader.readUntil("TTL=", timer).contains("TTL=");
@@ -80,7 +80,7 @@ public class Cmd implements ISender, IReadable {
     }
 
     @Override
-    public String readAll(ITimer tiker) {
+    public String readAll(AbsTime tiker) {
         return reader.readAll(tiker);
     }
 
@@ -90,7 +90,7 @@ public class Cmd implements ISender, IReadable {
     }
 
     @Override
-    public String readUntil(String regex, ITimer tiker) {
+    public String readUntil(String regex, AbsTime tiker) {
         return reader.readUntil(regex, tiker);
     }
 

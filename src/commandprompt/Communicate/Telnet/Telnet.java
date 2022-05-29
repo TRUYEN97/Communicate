@@ -4,7 +4,7 @@
  */
 package commandprompt.Communicate.Telnet;
 
-import Time.WaitTime.ITimer;
+import Time.WaitTime.AbsTime;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import commandprompt.AbstractStream.SubClass.ReadStream;
 import commandprompt.Communicate.Comport.IConnect;
@@ -87,7 +87,7 @@ public class Telnet implements ISender, IReadable, IConnect {
     }
 
     @Override
-    public String readAll(ITimer tiker) {
+    public String readAll(AbsTime tiker) {
         return input.readAll(tiker);
     }
 
@@ -97,7 +97,7 @@ public class Telnet implements ISender, IReadable, IConnect {
     }
 
     @Override
-    public String readUntil(String regex, ITimer tiker) {
+    public String readUntil(String regex, AbsTime tiker) {
         return input.readUntil(regex, tiker);
     }
 

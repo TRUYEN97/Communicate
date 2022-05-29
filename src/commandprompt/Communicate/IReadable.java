@@ -4,7 +4,7 @@
  */
 package commandprompt.Communicate;
 
-import Time.WaitTime.ITimer;
+import Time.WaitTime.AbsTime;
 
 /**
  *
@@ -17,9 +17,9 @@ public interface IReadable {
 
     String readAll();
 
-    String readAll(ITimer tiker);
+    String readAll(AbsTime tiker);
 
     String readUntil(String regex);
 
-    String readUntil(String regex, ITimer tiker);
+    String readUntil(String regex, AbsTime tiker);
 }
