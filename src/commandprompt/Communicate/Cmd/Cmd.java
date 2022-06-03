@@ -9,6 +9,7 @@ import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
 import Time.WaitTime.Class.TimeS;
 import commandprompt.AbstractStream.AbsStreamReadable;
+import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
 import java.io.IOException;
 
 /**
@@ -21,6 +22,12 @@ public class Cmd implements ISender, IReadable {
     private final ProcessBuilder builder;
     private final AbsStreamReadable reader;
 
+    public Cmd() {
+        this.reader = new ReadStreamOverTime();
+        this.builder = new ProcessBuilder();
+        this.builder.redirectErrorStream(true);
+    }
+    
     public Cmd(AbsStreamReadable reader) {
         this.reader = reader;
         this.builder = new ProcessBuilder();
@@ -41,8 +48,8 @@ public class Cmd implements ISender, IReadable {
         return false;
     }
 
-    public boolean pingUntilConnect(String url, AbsTime timer) {
-        String cmd = String.format("ping %s -t", url);
+    public boolean pingUntilConnect(String addr, AbsTime timer) {
+        String cmd = String.format("ping %s -t", addr);
         if (sendCommand(cmd)) {
             return reader.readUntil("TTL=", timer).contains("TTL=");
         }

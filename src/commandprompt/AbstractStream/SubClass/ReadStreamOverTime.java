@@ -60,9 +60,4 @@ public class ReadStreamOverTime extends AbsStreamReadable {
         return data.toString();
     }
 
-    @Override
-    public AbsStreamReadable getReader() {
-        return this;
-    }
-
 }

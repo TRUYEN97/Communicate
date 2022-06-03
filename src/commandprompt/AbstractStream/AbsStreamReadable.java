@@ -36,8 +36,6 @@ public abstract class AbsStreamReadable implements IReadable {
         }
     }
 
-    public abstract AbsStreamReadable getReader();
-
     public void setReader(InputStream reader) {
         this.reader = reader;
     }

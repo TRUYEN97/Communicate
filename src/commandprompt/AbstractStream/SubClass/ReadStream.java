@@ -37,9 +37,4 @@ public class ReadStream extends AbsStreamReadable {
     public String readLine() {
         return readUntil("\n", new TimeS(MAX));
     }
-
-    @Override
-    public AbsStreamReadable getReader() {
-       return this;
-    }
 }
