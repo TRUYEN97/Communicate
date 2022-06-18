@@ -21,9 +21,11 @@ public class PowerSwitch {
 
     private final HttpClient httpclient;
     private final String authHeader;
+    private final String host;
     private String result;
 
-    public PowerSwitch(String username, String password) {
+    public PowerSwitch(String host, String username, String password) {
+        this.host = host;
         this.httpclient = HttpClientBuilder.create().build();
         String auth = String.format("%s:%s", username, password);
         byte[] encodedAuth = Base64.encodeBase64(
@@ -31,22 +33,64 @@ public class PowerSwitch {
         authHeader = "Basic " + new String(encodedAuth);
     }
 
+    public boolean setOn(int index) {
+        if (checkIndex(index)) {
+            return false;
+        }
+        String command = String.format("http://%s/outlet?%d=ON", this.host, index);
+        return powerSwitch(command) == 200;
+    }
+
+    public boolean setOff(int index) {
+         if (checkIndex(index)) {
+            return false;
+        }
+        String command = String.format("http://%s/outlet?%d=OFF", this.host, index);
+        return powerSwitch(command) == 200;
+    }
+    
+    public boolean setOnAll() {
+        String command = String.format("http://%s/outlet?a=ON", this.host);
+        return powerSwitch(command) == 200;
+    }
+    
+    public boolean setCycle(int index) {
+         if (checkIndex(index)) {
+            return false;
+        }
+        String command = String.format("http://%s/outlet?%d=CCL", this.host, index);
+        return powerSwitch(command) == 200;
+    }
+    
+    private boolean setOffAll() {
+        String command = String.format("http://%s/outlet?a=OFF", this.host);
+        return powerSwitch(command) == 200;
+    }
+
     public int powerSwitch(String command) {
         HttpGet request = new HttpGet(command);
         try {
             request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpResponse response = client.execute(request);
-            result = response.getStatusLine().getReasonPhrase();
+            HttpResponse response = httpclient.execute(request);
+            result = response.getStatusLine().toString();
             return response.getStatusLine().getStatusCode();
         } catch (IOException e) {
             e.printStackTrace();
-            result = "Exception: "+e.getMessage();
+            result = "Exception: " + e.getMessage();
             return -1;
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println(new PowerSwitch("admin", "1234").powerSwitch("http://192.168.0.10/outlet?1=ON"));
+    
+    public String getResult() {
+        return result;
     }
+
+    private boolean checkIndex(int index) {
+        if (index < 1 || index > 8) {
+            result = "index out of range!";
+            return true;
+        }
+        return false;
+    }
+    
 }
