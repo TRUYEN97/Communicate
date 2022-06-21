@@ -22,7 +22,7 @@ public class PowerSwitch {
     private final HttpClient httpclient;
     private final String authHeader;
     private final String host;
-    private String result;
+    private StringBuilder result;
 
     public PowerSwitch(String host, String username, String password) {
         this.host = host;
@@ -38,32 +38,36 @@ public class PowerSwitch {
             return false;
         }
         String command = String.format("http://%s/outlet?%d=ON", this.host, index);
+        addLog(command);
         return powerSwitch(command) == 200;
     }
 
     public boolean setOff(int index) {
-         if (checkIndex(index)) {
+        if (checkIndex(index)) {
             return false;
         }
         String command = String.format("http://%s/outlet?%d=OFF", this.host, index);
+        addLog(command);
         return powerSwitch(command) == 200;
     }
-    
+
     public boolean setOnAll() {
         String command = String.format("http://%s/outlet?a=ON", this.host);
         return powerSwitch(command) == 200;
     }
-    
+
     public boolean setCycle(int index) {
-         if (checkIndex(index)) {
+        if (checkIndex(index)) {
             return false;
         }
         String command = String.format("http://%s/outlet?%d=CCL", this.host, index);
+        addLog(command);
         return powerSwitch(command) == 200;
     }
-    
+
     private boolean setOffAll() {
         String command = String.format("http://%s/outlet?a=OFF", this.host);
+        addLog(command);
         return powerSwitch(command) == 200;
     }
 
@@ -72,25 +76,31 @@ public class PowerSwitch {
         try {
             request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
             HttpResponse response = httpclient.execute(request);
-            result = response.getStatusLine().toString();
+            addLog(response.getStatusLine().toString());
             return response.getStatusLine().getStatusCode();
         } catch (IOException e) {
             e.printStackTrace();
-            result = "Exception: " + e.getMessage();
+            result.append("Exception: ").append(e.getMessage());
             return -1;
         }
     }
-    
+
     public String getResult() {
-        return result;
+        String tempRs = result.toString();
+        result.delete(0, result.length());
+        return tempRs;
+    }
+
+    private void addLog(String log) {
+        result.append(log).append("\r\n");
     }
 
     private boolean checkIndex(int index) {
         if (index < 1 || index > 8) {
-            result = "index out of range!";
+            result.append("index out of range!");
             return true;
         }
         return false;
     }
-    
+
 }
