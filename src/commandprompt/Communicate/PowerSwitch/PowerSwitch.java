@@ -27,6 +27,7 @@ public class PowerSwitch {
     public PowerSwitch(String host, String username, String password) {
         this.host = host;
         this.httpclient = HttpClientBuilder.create().build();
+        this.result = new StringBuilder();
         String auth = String.format("%s:%s", username, password);
         byte[] encodedAuth = Base64.encodeBase64(
                 auth.getBytes(StandardCharsets.ISO_8859_1));

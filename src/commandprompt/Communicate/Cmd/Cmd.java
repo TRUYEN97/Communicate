@@ -27,7 +27,7 @@ public class Cmd implements ISender, IReadable {
         this.builder = new ProcessBuilder();
         this.builder.redirectErrorStream(true);
     }
-    
+
     public Cmd(AbsStreamReadable reader) {
         this.reader = reader;
         this.builder = new ProcessBuilder();
@@ -40,8 +40,8 @@ public class Cmd implements ISender, IReadable {
         return insertCommand(command);
     }
 
-    public boolean pingTo(String url) {
-        String cmd = "ping ".concat(url);
+    public boolean pingTo(String url, int count) {
+        String cmd = String.format("ping %s -n %d", url, count);
         if (sendCommand(cmd)) {
             return reader.readUntil("TTL=", new TimeS(5)).contains("TTL=");
         }
