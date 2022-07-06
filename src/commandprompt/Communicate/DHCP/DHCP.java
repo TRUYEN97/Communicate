@@ -59,7 +59,7 @@ public class DHCP implements Runnable {
         DHCPPacket temp = new DHCPPacket();
         this.loger.begin(logPath, true);
         if (isNotHostAddress(this.dhcpHost)) {
-            String mess = "The network card cannot be found to \"" + this.dhcpHost+"\"";
+            String mess = "The network card cannot be found to \"" + this.dhcpHost + "\"";
             JOptionPane.showMessageDialog(null, mess, "Tip",
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
@@ -128,15 +128,11 @@ public class DHCP implements Runnable {
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
-                        loger.addLog("///////////////////////////////////////");
-                        loger.addLog("dhcp discover");
+                        loger.addLog("==============================================");
                         loger.addLog(host_Address.getHostAddress());
-                        loger.addLog("--------start--------------");
-                        loger.addLog("DHCP PROT: " + dp.getPort());
-                        loger.addLog("DHCP ADDRESS: " + dp.getAddress().toString());
-                        loger.addLog("DHCP SOCK ADDRESS: " + dp.getSocketAddress().toString());
-                        loger.addLog(Arrays.toString(dp.getData()));
-                        loger.addLog("---------end--------------");
+                        loger.addLog("DISCOVER", "DHCP PORT: " + dp.getPort());
+                        loger.addLog("DISCOVER", "DHCP ADDRESS: " + dp.getAddress().toString());
+                        loger.addLog("DISCOVER", "DHCP SOCK ADDRESS: " + dp.getSocketAddress().toString());
                     }
                     case DHCPConstants.DHCPREQUEST -> {
                         DHCPPacket d;
@@ -145,8 +141,8 @@ public class DHCP implements Runnable {
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
-                        loger.addLog("dhcp request");
-                        loger.addLog(ip + " OK");
+                        loger.addLog("REQUEST", "dhcp request");
+                        loger.addLog("REQUEST", ip + " OK");
                     }
                 }
             }
