@@ -135,4 +135,9 @@ public class ComPort implements ISender, IReadable, IConnect {
     public boolean isConnect() {
         return out != null;
     }
+
+    @Override
+    public String readLine(AbsTime tiker) {
+        return input.readLine(tiker);
+    }
 }

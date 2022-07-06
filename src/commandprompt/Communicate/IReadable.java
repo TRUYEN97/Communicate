@@ -14,6 +14,8 @@ public interface IReadable {
 
     
     String readLine();
+    
+    String readLine(AbsTime tiker);
 
     String readAll();
 

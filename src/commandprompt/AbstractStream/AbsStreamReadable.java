@@ -40,6 +40,7 @@ public abstract class AbsStreamReadable implements IReadable {
         this.reader = reader;
     }
 
+    @Override
     public String readLine(AbsTime time) {
         return readUntil("\n", time);
     }

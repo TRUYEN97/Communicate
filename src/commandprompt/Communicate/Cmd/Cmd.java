@@ -101,4 +101,9 @@ public class Cmd implements ISender, IReadable {
         return reader.readUntil(regex, tiker);
     }
 
+    @Override
+    public String readLine(AbsTime tiker) {
+        return reader.readLine(tiker);
+    }
+
 }

@@ -24,7 +24,7 @@ public class Telnet implements ISender, IReadable, IConnect {
     private PrintStream out;
     private final AbsStreamReadable input;
     private String host;
-
+    
     public Telnet() {
         this.telnet = new TelnetClient();
         this.input = new ReadStream();
@@ -79,6 +79,11 @@ public class Telnet implements ISender, IReadable, IConnect {
     @Override
     public String readLine() {
         return input.readLine();
+    }
+    
+    @Override
+    public String readLine(AbsTime time) {
+        return input.readLine(time);
     }
 
     @Override
