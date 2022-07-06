@@ -42,7 +42,7 @@ public class DhcpData {
     }
 
     public String getIP(String mac) {
-        return this.idMac.get(mac);
+        return this.idMac.get(mac.replaceAll(":", ""));
     }
 
     public boolean setNetIP(String netIp) {
