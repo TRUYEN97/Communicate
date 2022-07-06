@@ -59,7 +59,7 @@ public class DHCP implements Runnable {
         DHCPPacket temp = new DHCPPacket();
         this.loger.begin(logPath, true);
         if (isNotHostAddress(this.dhcpHost)) {
-            String mess = "The network card cannot be found to" + this.dhcpHost;
+            String mess = "The network card cannot be found to \"" + this.dhcpHost+"\"";
             JOptionPane.showMessageDialog(null, mess, "Tip",
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
@@ -113,12 +113,12 @@ public class DHCP implements Runnable {
                 dhcp = DHCPPacket.getPacket(pac);
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 System.out.println("DHCP requests mac: " + mac);
-                view.setText("DHCP requests mac: " + mac);
+                showMess("DHCP requests mac: " + mac);
                 String ip = dhcpData.getIP(mac);
                 if (ip == null) {
                     continue;
                 }
-                view.setText(String.format("DHCP: %s\r\nIP: %s", mac, ip));
+                showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
                 byte rev = dhcp.getDHCPMessageType();
                 switch (rev) {
                     case DHCPConstants.DHCPDISCOVER -> {
@@ -155,6 +155,13 @@ public class DHCP implements Runnable {
             JOptionPane.showMessageDialog(null, e.toString(), "Tip", JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
+    }
+
+    private void showMess(String mess) {
+        if (view == null) {
+            return;
+        }
+        view.setText(mess);
     }
 
     private String bytesToHex(byte[] bytes) {
