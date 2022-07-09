@@ -11,7 +11,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import org.dhcp4java.DHCPBadPacketException;
@@ -113,12 +112,16 @@ public class DHCP implements Runnable {
                 dhcp = DHCPPacket.getPacket(pac);
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 System.out.println("DHCP requests mac: " + mac);
+                loger.addLog("*******************************************");
+                loger.addLog("DHCP", "DHCP requests mac: " + mac);
                 showMess("DHCP requests mac: " + mac);
                 String ip = dhcpData.getIP(mac);
                 if (ip == null) {
                     continue;
                 }
                 showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
+                loger.addLog("DHCP", mac + "-" + ip);
+                loger.addLog("*******************************************");
                 byte rev = dhcp.getDHCPMessageType();
                 switch (rev) {
                     case DHCPConstants.DHCPDISCOVER -> {
