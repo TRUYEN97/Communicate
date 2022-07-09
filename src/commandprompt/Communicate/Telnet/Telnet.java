@@ -30,6 +30,11 @@ public class Telnet implements ISender, IReadable, IConnect {
         this.input = new ReadStream();
     }
 
+    public Telnet(AbsStreamReadable readable) {
+         this.telnet = new TelnetClient();
+        this.input = readable;
+    }
+
     @Override
     public boolean connect(String host, int port) {
         try {
