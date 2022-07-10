@@ -22,7 +22,7 @@ public class PowerSwitch {
     private final HttpClient httpclient;
     private final String authHeader;
     private final String host;
-    private StringBuilder result;
+    private final StringBuilder result;
 
     public PowerSwitch(String host, String username, String password) {
         this.host = host;
