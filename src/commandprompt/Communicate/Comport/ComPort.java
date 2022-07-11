@@ -57,7 +57,7 @@ public class ComPort implements ISender, IReadable, IConnect {
         }
     }
 
-    private Set<String> getCommPorts() {
+    public Set<String> getCommPorts() {
         Set<String> returnValue = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         SerialPort[] ports = SerialPort.getCommPorts();
         if (ports != null && ports.length > 0) {
@@ -142,17 +142,5 @@ public class ComPort implements ISender, IReadable, IConnect {
     @Override
     public String readLine(AbsTime tiker) {
         return input.readLine(tiker);
-    }
-
-    public static void main(String[] args) {
-        ComPort comPort = new ComPort();
-        System.out.println(comPort.connect("com3", 115200));
-        System.out.println(comPort.sendCommand("\r\n"));
-        while (true) {
-            String a = comPort.readLine();
-            if (a != null) {
-                System.out.println(a.trim());
-            }
-        }
     }
 }
