@@ -28,10 +28,12 @@ public abstract class AbsStreamReadable implements IReadable {
 
     public boolean disConnect() {
         try {
-            this.reader.close();
+            if (reader != null) {
+                this.reader.close();
+            }
             return true;
         } catch (IOException ex) {
-            System.out.println(ex);
+            ex.printStackTrace();
             return false;
         }
     }

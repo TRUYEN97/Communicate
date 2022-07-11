@@ -37,7 +37,6 @@ public class ReadStreamOverTime extends AbsStreamReadable {
         try {
             return scanner.readLine();
         } catch (IOException ex) {
-            System.err.println(ex);
             return null;
         }
     }

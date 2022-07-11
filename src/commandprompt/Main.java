@@ -9,7 +9,7 @@ import commandprompt.AbstractStream.SubClass.ReadStream;
 import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
 import commandprompt.Communicate.Cmd.Cmd;
 import commandprompt.Communicate.Comport.ComPort;
-import commandprompt.Communicate.Comport.IConnect;
+import commandprompt.Communicate.IConnect;
 import commandprompt.Communicate.Telnet.Telnet;
 import java.util.Scanner;
 
@@ -20,15 +20,17 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("1-Telnet 2-CMD  3-Comport: ");
-        switch (scanner.nextInt()) {
-            case 1 ->
-                telnet(scanner);
-            case 2 ->
-                cmd(scanner);
-            case 3 ->
-                port(scanner);
+        while (true) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("1-Telnet 2-CMD  3-Comport: ");
+            switch (scanner.nextInt()) {
+                case 1 ->
+                    telnet(scanner);
+                case 2 ->
+                    cmd(scanner);
+                case 3 ->
+                    port(scanner);
+            }
         }
     }
 
@@ -41,6 +43,10 @@ public class Main {
         String input;
         while (scanner.hasNextLine()) {
             input = scanner.nextLine();
+            if (checkExit(input)) {
+                telnet.disConnect();
+                return;
+            }
             telnet.insertCommand(input);
             String line;
             while ((line = telnet.readLine()) != null) {
@@ -61,8 +67,13 @@ public class Main {
     private static void cmd(Scanner scanner) {
         System.out.println("Command line");
         Cmd cmd = new Cmd(new ReadStream());
+        String input;
         while (scanner.hasNextLine()) {
-            cmd.sendCommand(scanner.nextLine());
+            input = scanner.nextLine();
+            if (checkExit(input)) {
+                return;
+            }
+            cmd.sendCommand(input);
             String line;
             while ((line = cmd.readLine()) != null) {
                 System.out.print(line);
@@ -71,14 +82,25 @@ public class Main {
 
     }
 
+    private static boolean checkExit(String line) {
+        if (line.equals("quit")) {
+            System.exit(0);
+        }
+        return line.equals("exit");
+    }
+
     @SuppressWarnings("empty-statement")
     private static void port(Scanner scanner) {
         System.out.println("ComPort");
         ComPort comPort = new ComPort();
-        while (!connect(scanner, comPort)) ;
+        while (!connect(scanner, comPort));
         String input;
         while (scanner.hasNextLine()) {
             input = scanner.nextLine();
+            if (checkExit(input)) {
+                comPort.disConnect();
+                return;
+            }
             comPort.insertCommand(input);
             String line;
             while ((line = comPort.readLine()) != null) {

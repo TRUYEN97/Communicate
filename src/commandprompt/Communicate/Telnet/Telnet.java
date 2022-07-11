@@ -7,7 +7,7 @@ package commandprompt.Communicate.Telnet;
 import Time.WaitTime.AbsTime;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import commandprompt.AbstractStream.SubClass.ReadStream;
-import commandprompt.Communicate.Comport.IConnect;
+import commandprompt.Communicate.IConnect;
 import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
 import java.io.IOException;

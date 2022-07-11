@@ -4,57 +4,84 @@
  */
 package commandprompt.Communicate.Comport;
 
+import commandprompt.Communicate.IConnect;
 import Time.WaitTime.AbsTime;
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortInvalidPortException;
 import commandprompt.AbstractStream.AbsStreamReadable;
-import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
+import commandprompt.AbstractStream.SubClass.ReadStream;
 import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
-import java.awt.HeadlessException;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Enumeration;
-import javax.comm.CommPortIdentifier;
-import javax.comm.PortInUseException;
-import javax.comm.SerialPort;
-import javax.comm.UnsupportedCommOperationException;
-import javax.swing.JOptionPane;
+import java.io.PrintWriter;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ComPort implements ISender, IReadable, IConnect {
 
-    private final Enumeration portList;
-    private CommPortIdentifier portId;
-    private SerialPort serialPort;
     private BufferedWriter out;
     private final AbsStreamReadable input;
+    private SerialPort serialPort;
 
     public ComPort() {
-        portList = CommPortIdentifier.getPortIdentifiers();
-        input = new ReadStreamOverTime();
+        input = new ReadStream();
     }
 
     @Override
-    public final boolean connect(String port, int baudrate) {
-        while (portList.hasMoreElements()) {
-            portId = (CommPortIdentifier) portList.nextElement();
-            if (isPortSerial() && portId.getName().equalsIgnoreCase(port)) {
-                return setupConnect(port, baudrate);
+    public synchronized boolean connect(String port, int baudrate) {
+        for (String commPort : getCommPorts()) {
+            if (commPort.equalsIgnoreCase(port)) {
+                return openComm(port, baudrate);
             }
         }
         return false;
     }
 
+    private boolean openComm(String port, int baudrate) {
+        try {
+            disConnect();
+            this.serialPort = SerialPort.getCommPort(port.toUpperCase());
+            if (!serialPort.openPort() || !serialPort.isOpen() || !serialPort.setComPortParameters(
+                    baudrate,
+                    8, // data bits
+                    SerialPort.ONE_STOP_BIT,
+                    SerialPort.NO_PARITY)) {
+                return false;
+            }
+            input.setReader(serialPort.getInputStream());
+            out = new BufferedWriter(new PrintWriter(serialPort.getOutputStream()));
+            return true;
+        } catch (SerialPortInvalidPortException e) {
+            return false;
+        }
+    }
+
+    private Set<String> getCommPorts() {
+        Set<String> returnValue = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        SerialPort[] ports = SerialPort.getCommPorts();
+        if (ports != null && ports.length > 0) {
+            for (SerialPort port : ports) {
+                returnValue.add(port.getSystemPortName());
+            }
+        }
+        return returnValue;
+    }
+
     @Override
     public boolean disConnect() {
-        if (serialPort != null) {
-            serialPort.close();
+        if (serialPort != null && serialPort.isOpen()) {
+            serialPort.closePort();
+            serialPort = null;
         }
         try {
-            out.close();
-            out = null;
+            if (out != null) {
+                out.close();
+                out = null;
+            }
             return input.disConnect();
         } catch (IOException ex) {
-            System.err.println(ex);
+            ex.printStackTrace();
             return false;
         }
     }
@@ -67,11 +94,14 @@ public class ComPort implements ISender, IReadable, IConnect {
 
     @Override
     public boolean insertCommand(String command) {
+        if (!isConnect()) {
+            return false;
+        }
         try {
             out.write(command);
             out.newLine();
             out.flush();
-            Thread.sleep(500);
+            Thread.sleep(100);
             return true;
         } catch (IOException | InterruptedException ex) {
             System.err.println(ex);
@@ -104,40 +134,25 @@ public class ComPort implements ISender, IReadable, IConnect {
         return input.readUntil(regex, tiker);
     }
 
-    private boolean isPortSerial() {
-        return portId.getPortType() == CommPortIdentifier.PORT_SERIAL;
-    }
-
-    private boolean setupConnect(String port, int baudrate) throws HeadlessException {
-        try {
-            serialPort = (SerialPort) portId.open(port.toUpperCase(), 2000);
-            serialPort.setSerialPortParams(baudrate,
-                    SerialPort.DATABITS_8,
-                    SerialPort.STOPBITS_1,
-                    SerialPort.PARITY_NONE);
-            input.setReader(serialPort.getInputStream());
-            out = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
-            return true;
-        } catch (IOException | PortInUseException | UnsupportedCommOperationException ex) {
-            try {
-                System.err.println(ex);
-                JOptionPane.showConfirmDialog(null, String.format("Com port initialization failed\r\n%s-%s\r\n%s",
-                        port, baudrate, this.getClass().getName()));
-                serialPort.close();
-                out.close();
-            } catch (IOException ex1) {
-            }
-            return false;
-        }
-    }
-
     @Override
     public boolean isConnect() {
-        return out != null;
+        return serialPort != null && serialPort.isOpen() && out != null;
     }
 
     @Override
     public String readLine(AbsTime tiker) {
         return input.readLine(tiker);
+    }
+
+    public static void main(String[] args) {
+        ComPort comPort = new ComPort();
+        System.out.println(comPort.connect("com3", 115200));
+        System.out.println(comPort.sendCommand("\r\n"));
+        while (true) {
+            String a = comPort.readLine();
+            if (a != null) {
+                System.out.println(a.trim());
+            }
+        }
     }
 }
