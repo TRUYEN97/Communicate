@@ -17,8 +17,10 @@ import java.io.InputStream;
 public abstract class AbsStreamReadable implements IReadable {
 
     protected InputStream reader;
+    private StringBuffer stringResult;
 
     protected AbsStreamReadable() {
+        this.stringResult = new StringBuffer();
     }
 
     protected AbsStreamReadable(InputStream reader) {
@@ -76,11 +78,16 @@ public abstract class AbsStreamReadable implements IReadable {
                     break;
                 }
             }
+            this.stringResult = result;
             return result.toString().isEmpty() ? null : result.toString();
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
         return null;
+    }
+
+    public StringBuffer getStringResult() {
+        return stringResult;
     }
 
     protected boolean isKeyWord(String result, String keyWord) {
@@ -93,6 +100,7 @@ public abstract class AbsStreamReadable implements IReadable {
 
     public void clearResult() {
         try {
+            stringResult.delete(0, stringResult.length());
             while (reader != null && reader.available() > 0) {
                 reader.read();
             }
