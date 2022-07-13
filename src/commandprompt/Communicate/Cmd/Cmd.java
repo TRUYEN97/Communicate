@@ -5,22 +5,22 @@
 package commandprompt.Communicate.Cmd;
 
 import Time.WaitTime.AbsTime;
-import commandprompt.Communicate.IReadable;
 import commandprompt.Communicate.ISender;
 import Time.WaitTime.Class.TimeS;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
+import commandprompt.Communicate.IReadStream;
 import java.io.IOException;
 
 /**
  *
  * @author Administrator
  */
-public class Cmd implements ISender, IReadable {
+public class Cmd implements ISender, IReadStream {
 
     private Process process;
     private final ProcessBuilder builder;
-    private final AbsStreamReadable reader;
+    private AbsStreamReadable reader;
 
     public Cmd() {
         this.reader = new ReadStreamOverTime();
@@ -104,6 +104,20 @@ public class Cmd implements ISender, IReadable {
     @Override
     public String readLine(AbsTime tiker) {
         return reader.readLine(tiker);
+    }
+
+    @Override
+    public boolean setStreamReadable(AbsStreamReadable readable) {
+        if (this.reader.disConnect()) {
+            this.reader = readable;
+            return true;
+        }
+        return true;
+    }
+
+    @Override
+    public StringBuffer getStringResult() {
+        return this.reader.getStringResult();
     }
 
 }

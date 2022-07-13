@@ -10,7 +10,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortInvalidPortException;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import commandprompt.AbstractStream.SubClass.ReadStream;
-import commandprompt.Communicate.IReadable;
+import commandprompt.Communicate.IReadStream;
 import commandprompt.Communicate.ISender;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -18,10 +18,10 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class ComPort implements ISender, IReadable, IConnect {
+public class ComPort implements ISender, IReadStream, IConnect {
 
     private BufferedWriter out;
-    private final AbsStreamReadable input;
+    private AbsStreamReadable input;
     private SerialPort serialPort;
 
     public ComPort() {
@@ -142,5 +142,19 @@ public class ComPort implements ISender, IReadable, IConnect {
     @Override
     public String readLine(AbsTime tiker) {
         return input.readLine(tiker);
+    }
+
+     @Override
+    public boolean setStreamReadable(AbsStreamReadable readable) {
+        if (this.input.disConnect()) {
+            this.input = readable;
+            return true;
+        }
+        return true;
+    }
+
+    @Override
+    public StringBuffer getStringResult() {
+        return this.input.getStringResult();
     }
 }

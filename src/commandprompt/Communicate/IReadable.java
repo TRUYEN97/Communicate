@@ -11,7 +11,8 @@ import Time.WaitTime.AbsTime;
  * @author Administrator
  */
 public interface IReadable {
-
+    
+    StringBuffer getStringResult();
     
     String readLine();
     

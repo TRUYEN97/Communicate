@@ -9,6 +9,8 @@ import Time.WaitTime.Class.TimeS;
 import commandprompt.Communicate.IReadable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -57,35 +59,33 @@ public abstract class AbsStreamReadable implements IReadable {
     @Override
     public String readUntil(String regex, AbsTime tiker) {
         StringBuffer result;
-        AbsTime timer;
         try {
             result = new StringBuffer();
-            timer = new TimeS(5);
             char kiTu;
             while (tiker.onTime() && reader != null) {
                 if (reader.available() > 0) {
                     if ((kiTu = (char) reader.read()) == -1) {
-                        break;
+                        continue;
                     }
                     result.append(kiTu);
                     if (isKeyWord(result.toString(), regex)) {
                         break;
                     }
-                    timer.update();
-                    continue;
-                }
-                if (!timer.onTime()) {
-                    break;
+                }else{
+                    Thread.sleep(100);
                 }
             }
             this.stringResult = result;
             return result.toString().isEmpty() ? null : result.toString();
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
+        } catch (InterruptedException ex) {
+            
         }
         return null;
     }
 
+    @Override
     public StringBuffer getStringResult() {
         return stringResult;
     }

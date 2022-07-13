@@ -8,7 +8,7 @@ import Time.WaitTime.AbsTime;
 import commandprompt.AbstractStream.AbsStreamReadable;
 import commandprompt.AbstractStream.SubClass.ReadStream;
 import commandprompt.Communicate.IConnect;
-import commandprompt.Communicate.IReadable;
+import commandprompt.Communicate.IReadStream;
 import commandprompt.Communicate.ISender;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -18,21 +18,35 @@ import org.apache.commons.net.telnet.TelnetClient;
  *
  * @author Administrator
  */
-public class Telnet implements ISender, IReadable, IConnect {
+public class Telnet implements ISender, IReadStream, IConnect {
 
     private final TelnetClient telnet;
     private PrintStream out;
-    private final AbsStreamReadable input;
+    private AbsStreamReadable input;
     private String host;
-    
+
     public Telnet() {
         this.telnet = new TelnetClient();
         this.input = new ReadStream();
     }
 
     public Telnet(AbsStreamReadable readable) {
-         this.telnet = new TelnetClient();
+        this.telnet = new TelnetClient();
         this.input = readable;
+    }
+
+    @Override
+    public boolean setStreamReadable(AbsStreamReadable readable) {
+        if (this.input.disConnect()) {
+            this.input = readable;
+            return true;
+        }
+        return true;
+    }
+
+    @Override
+    public StringBuffer getStringResult() {
+        return this.input.getStringResult();
     }
 
     @Override
@@ -85,7 +99,7 @@ public class Telnet implements ISender, IReadable, IConnect {
     public String readLine() {
         return input.readLine();
     }
-    
+
     @Override
     public String readLine(AbsTime time) {
         return input.readLine(time);
