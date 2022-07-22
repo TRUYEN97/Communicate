@@ -113,15 +113,14 @@ public class DHCP implements Runnable {
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 System.out.println("DHCP requests mac: " + mac);
                 loger.addLog("*******************************************");
-                loger.addLog("DHCP", "DHCP requests mac: " + mac);
-                showMess("DHCP requests mac: " + mac);
                 String ip = dhcpData.getIP(mac);
+                String mess = String.format("DHCP requests mac: %s - IP: %s", mac,ip);
+                loger.addLog("DHCP", mess);
+                showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
+                loger.addLog("*******************************************");
                 if (ip == null) {
                     continue;
                 }
-                showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
-                loger.addLog("DHCP", mac + "-" + ip);
-                loger.addLog("*******************************************");
                 byte rev = dhcp.getDHCPMessageType();
                 switch (rev) {
                     case DHCPConstants.DHCPDISCOVER -> {

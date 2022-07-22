@@ -19,7 +19,6 @@ public class DhcpData {
 
     private DhcpData() {
         this.idMac = new HashMap<>();
-        this.idMac.put("649714048d60", "172.168.1.0");
     }
 
     public static DhcpData getInstance() {
@@ -42,7 +41,10 @@ public class DhcpData {
     }
 
     public String getIP(String mac) {
-        return this.idMac.get(mac.replaceAll(":", ""));
+        if (!mac.contains(":")) {
+            mac = createTrueMac(mac);
+        }
+        return this.idMac.get(mac);
     }
 
     public boolean setNetIP(String netIp) {
@@ -53,6 +55,19 @@ public class DhcpData {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private String createTrueMac(String value) {
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        for (char kitu : value.toCharArray()) {
+            if (index != 0 && index % 2 == 0) {
+                builder.append(':');
+            }
+            builder.append(kitu);
+            index++;
+        }
+        return builder.toString();
     }
 
     private void deleteIpOlder(String ip) {
