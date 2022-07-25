@@ -11,5 +11,6 @@ package commandprompt.Communicate;
 public interface ISender {
     
     boolean sendCommand(String command);
+    
     boolean insertCommand(String command);
 }

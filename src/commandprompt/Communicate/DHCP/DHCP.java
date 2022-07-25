@@ -114,8 +114,8 @@ public class DHCP implements Runnable {
                 System.out.println("DHCP requests mac: " + mac);
                 loger.addLog("*******************************************");
                 String ip = dhcpData.getIP(mac);
-                String mess = String.format("DHCP requests mac: %s - IP: %s", mac,ip);
-                loger.addLog("DHCP", mess);
+//                String mess = String.format("DHCP requests mac: %s - IP: %s", mac,ip);
+//                loger.addLog("DHCP", mess);
                 showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
                 loger.addLog("*******************************************");
                 if (ip == null) {
