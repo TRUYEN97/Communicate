@@ -37,14 +37,19 @@ public class DhcpData {
     public void put(String mac, int id) {
         String ip = this.netIP + id;
         deleteIpOlder(ip);
-        this.idMac.put(mac, ip);
+        this.idMac.put(macFormat(mac), ip);
+    }
+
+    private String macFormat(String mac) {
+        mac = mac.toUpperCase();
+        if (!mac.contains(":")) {
+            return createTrueMac(mac);
+        }
+        return mac;
     }
 
     public String getIP(String mac) {
-        if (!mac.contains(":")) {
-            mac = createTrueMac(mac);
-        }
-        return this.idMac.get(mac);
+        return this.idMac.get(macFormat(mac));
     }
 
     public boolean setNetIP(String netIp) {

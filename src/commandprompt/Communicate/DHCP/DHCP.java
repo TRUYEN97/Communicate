@@ -111,13 +111,9 @@ public class DHCP implements Runnable {
                 socket.receive(pac);
                 dhcp = DHCPPacket.getPacket(pac);
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
-                System.out.println("DHCP requests mac: " + mac);
-                loger.addLog("*******************************************");
                 String ip = dhcpData.getIP(mac);
-//                String mess = String.format("DHCP requests mac: %s - IP: %s", mac,ip);
-//                loger.addLog("DHCP", mess);
+                System.out.println("DHCP requests: " + mac+ " - "+ip);
                 showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
-                loger.addLog("*******************************************");
                 if (ip == null) {
                     continue;
                 }
@@ -143,8 +139,9 @@ public class DHCP implements Runnable {
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
-                        loger.addLog("REQUEST", "dhcp request");
-                        loger.addLog("REQUEST", ip + " OK");
+                        loger.addLog("REQUEST", ip + " - "+ mac);
+                        loger.addLog("REQUEST", "dhcp request ok");
+                        loger.addLog("*******************************************");
                     }
                 }
             }
