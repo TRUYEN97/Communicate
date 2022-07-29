@@ -2,9 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package commandprompt.Communicate.DHCP;
+package commandprompt.DHCP;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,10 +36,20 @@ public class DhcpData {
         return ins;
     }
 
-    public void put(String mac, int id) {
+    public boolean put(String mac, int id) {
         String ip = this.netIP + id;
-        deleteIpOlder(ip);
-        this.idMac.put(macFormat(mac), ip);
+        try {
+            String newMac = macFormat(mac);
+            if (newMac.length() != 17) {
+                return false;
+            }
+            deleteIpOlder(ip);
+            this.idMac.put(newMac, ip);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private String macFormat(String mac) {
@@ -76,10 +88,17 @@ public class DhcpData {
     }
 
     private void deleteIpOlder(String ip) {
+        if (!this.idMac.containsValue(ip)) {
+            return;
+        }
+        List<String> keys = new ArrayList<>();
         for (String key : this.idMac.keySet()) {
             if (this.idMac.get(key).equals(ip)) {
-                this.idMac.remove(key);
+                keys.add(key);
             }
+        }
+        for (String key : keys) {
+            this.idMac.remove(key);
         }
     }
 }
