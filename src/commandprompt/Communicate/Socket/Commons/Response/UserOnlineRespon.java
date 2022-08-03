@@ -4,7 +4,7 @@
  */
 package commandprompt.Communicate.Socket.Commons.Response;
 
-import commandprompt.Communicate.Socket.Commons.Client.InfomationClient;
+import commandprompt.Communicate.Socket.Commons.Info.InfomationClient;
 import commandprompt.Communicate.Socket.Commons.Enums.StatusCode;
 import java.util.ArrayList;
 import java.util.List;

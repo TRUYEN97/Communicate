@@ -76,7 +76,7 @@ public abstract class AbsStreamReadable implements IReadable {
                 }
             }
             this.stringResult = result;
-            return result.toString().isEmpty() ? null : result.toString();
+            return result.toString().trim().isBlank()? null : result.toString().trim();
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         } catch (InterruptedException ex) {
