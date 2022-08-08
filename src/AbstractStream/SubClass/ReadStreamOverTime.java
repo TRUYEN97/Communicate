@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package commandprompt.AbstractStream.SubClass;
+package AbstractStream.SubClass;
 
-import commandprompt.AbstractStream.AbsStreamReadable;
+import AbstractStream.AbsStreamReadable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

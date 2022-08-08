@@ -2,14 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package commandprompt.Communicate.Cmd;
+package Communicate.Cmd;
 
 import Time.WaitTime.AbsTime;
-import commandprompt.Communicate.ISender;
+import Communicate.ISender;
 import Time.WaitTime.Class.TimeS;
-import commandprompt.AbstractStream.AbsStreamReadable;
-import commandprompt.AbstractStream.SubClass.ReadStreamOverTime;
-import commandprompt.Communicate.IReadStream;
+import AbstractStream.AbsStreamReadable;
+import AbstractStream.SubClass.ReadStreamOverTime;
+import Communicate.IReadStream;
 import java.io.IOException;
 
 /**

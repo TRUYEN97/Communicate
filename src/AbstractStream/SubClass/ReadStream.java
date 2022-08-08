@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package commandprompt.AbstractStream.SubClass;
+package AbstractStream.SubClass;
 
 import Time.WaitTime.Class.TimeS;
-import commandprompt.AbstractStream.AbsStreamReadable;
+import AbstractStream.AbsStreamReadable;
 import java.io.InputStream;
 
 /**

@@ -2,16 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package commandprompt.Communicate.Comport;
+package Communicate.Comport;
 
-import commandprompt.Communicate.IConnect;
+import Communicate.IConnect;
 import Time.WaitTime.AbsTime;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortInvalidPortException;
-import commandprompt.AbstractStream.AbsStreamReadable;
-import commandprompt.AbstractStream.SubClass.ReadStream;
-import commandprompt.Communicate.IReadStream;
-import commandprompt.Communicate.ISender;
+import AbstractStream.AbsStreamReadable;
+import AbstractStream.SubClass.ReadStream;
+import Communicate.IReadStream;
+import Communicate.ISender;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;

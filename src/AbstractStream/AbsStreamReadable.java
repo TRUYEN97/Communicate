@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package commandprompt.AbstractStream;
+package AbstractStream;
 
 import Time.WaitTime.AbsTime;
 import Time.WaitTime.Class.TimeS;
-import commandprompt.Communicate.IReadable;
+import Communicate.IReadable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;

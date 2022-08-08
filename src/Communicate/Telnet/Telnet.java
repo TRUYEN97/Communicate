@@ -2,14 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package commandprompt.Communicate.Telnet;
+package Communicate.Telnet;
 
 import Time.WaitTime.AbsTime;
-import commandprompt.AbstractStream.AbsStreamReadable;
-import commandprompt.AbstractStream.SubClass.ReadStream;
-import commandprompt.Communicate.IConnect;
-import commandprompt.Communicate.IReadStream;
-import commandprompt.Communicate.ISender;
+import AbstractStream.AbsStreamReadable;
+import AbstractStream.SubClass.ReadStream;
+import Communicate.IConnect;
+import Communicate.IReadStream;
+import Communicate.ISender;
 import java.io.IOException;
 import java.io.PrintStream;
 import org.apache.commons.net.telnet.TelnetClient;
