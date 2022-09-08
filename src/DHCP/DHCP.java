@@ -11,8 +11,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import org.dhcp4java.DHCPBadPacketException;
@@ -68,7 +66,6 @@ public class DHCP implements Runnable {
             String mess = "The network card cannot be found to \"" + this.dhcpHost + "\"";
             JOptionPane.showMessageDialog(null, mess, "Tip",
                     JOptionPane.WARNING_MESSAGE);
-            System.exit(0);
             return false;
         }
         try {
