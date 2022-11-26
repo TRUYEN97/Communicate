@@ -80,12 +80,12 @@ public class FtpClient implements IConnect, ILogin {
     }
 
     public boolean appendFtpFile(String data, String ftpFile) {
-        if (!resetConnect()) {
-            return false;
-        }
         File file = new File(ftpFile);
         if (!checkFtpDirectoryExists(file.getParent())) {
             makeFtpDirectory(file.getParent());
+        }
+        if (!reConnect()) {
+            return false;
         }
         try ( OutputStream stream = this.ftpClient.appendFileStream(ftpFile)) {
             stream.write(data.getBytes());
@@ -95,18 +95,18 @@ public class FtpClient implements IConnect, ILogin {
             ex.printStackTrace();
             return false;
         } finally {
-            resetConnect();
+            disConnect();
         }
 
     }
 
     public boolean upStringToFTP(String data, String ftpFile) {
-        if (!resetConnect()) {
-            return false;
-        }
         File file = new File(ftpFile);
         if (!checkFtpDirectoryExists(file.getParent())) {
             makeFtpDirectory(file.getParent());
+        }
+        if (!reConnect()) {
+            return false;
         }
         try ( OutputStream stream = this.ftpClient.storeFileStream(ftpFile)) {
             stream.write(data.getBytes());
@@ -116,7 +116,7 @@ public class FtpClient implements IConnect, ILogin {
             ex.printStackTrace();
             return false;
         } finally {
-            resetConnect();
+            disConnect();
         }
     }
 
@@ -128,12 +128,12 @@ public class FtpClient implements IConnect, ILogin {
     }
 
     public boolean uploadFile(String localFile, String newFtpFile) {
-        if (!resetConnect()) {
-            return false;
-        }
         File file = new File(newFtpFile);
         if (!checkFtpDirectoryExists(file.getParent())) {
             makeFtpDirectory(file.getParent());
+        }
+        if (!reConnect()) {
+            return false;
         }
         try ( InputStream input = new FileInputStream(new File(localFile))) {
             return this.ftpClient.storeFile(newFtpFile, input);
@@ -144,9 +144,6 @@ public class FtpClient implements IConnect, ILogin {
     }
 
     public boolean downloadFile(String FtpFile, String localFile) {
-        if (!resetConnect()) {
-            return false;
-        }
         if (!checkFileFtpExists(FtpFile)) {
             return false;
         }
@@ -154,49 +151,47 @@ public class FtpClient implements IConnect, ILogin {
         if (!isParentExists(file) && !makeParentFile(file)) {
             return false;
         }
-        OutputStream outputStream = null;
-        try {
-            outputStream = new BufferedOutputStream(new FileOutputStream(localFile));
+        if (!reConnect()) {
+            return false;
+        }
+        try ( OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(localFile))) {
             return this.ftpClient.retrieveFile(FtpFile, outputStream);
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;
         } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
+            disConnect();
         }
     }
 
     public boolean renameFtpFile(String oldName, String newName) {
         try {
-            if (!resetConnect()) {
+            if (!reConnect()) {
                 return false;
             }
             return this.ftpClient.rename(oldName, newName);
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;
+        }finally{
+            disConnect();
         }
     }
-    
 
     public boolean deleteFolder(String programFolder) {
-        if (!resetConnect()) {
-            return false;
-        }
         if (!checkFtpDirectoryExists(programFolder)) {
             return true;
-        } 
+        }
+        if (!reConnect()) {
+            return false;
+        }
         try {
             return this.ftpClient.deleteFile(programFolder);
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;
+        }finally{
+            disConnect();
         }
     }
 
@@ -215,44 +210,31 @@ public class FtpClient implements IConnect, ILogin {
     }
 
     private boolean makeFtpDirectory(String dir) {
+        if (!reConnect()) {
+            return false;
+        }
         try {
             return this.ftpClient.makeDirectory(dir);
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;
+        } finally {
+            disConnect();
         }
     }
 
     private boolean checkFileFtpExists(String filePath) {
-        if (!resetConnect()) {
+        if (!reConnect()) {
             return false;
         }
-        InputStream inputStream = null;
-        try {
-            inputStream = ftpClient.retrieveFileStream(filePath);
+        try ( InputStream inputStream = ftpClient.retrieveFileStream(filePath)) {
             return !(inputStream == null || ftpClient.getReplyCode() == 550);
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;
         } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            resetConnect();
+            disConnect();
         }
-    }
-
-    private boolean resetConnect() {
-        if (isConnect()) {
-            if (!disConnect()) {
-                return false;
-            }
-        }
-        return reConnect();
     }
 
     private boolean reConnect() {
@@ -260,7 +242,7 @@ public class FtpClient implements IConnect, ILogin {
     }
 
     public boolean checkFtpDirectoryExists(String dirPath) {
-        if (!resetConnect()) {
+        if (!reConnect()) {
             return false;
         }
         try {
@@ -273,15 +255,21 @@ public class FtpClient implements IConnect, ILogin {
             ex.printStackTrace();
             return false;
         } finally {
-            resetConnect();
+            disConnect();
         }
     }
 
     private boolean makeParentFile(File file) {
-        return file.getParentFile().mkdirs();
+        if (reConnect()) {
+            return file.getParentFile().mkdirs();
+        }
+        return false;
     }
 
     private boolean isParentExists(File file) {
-        return file.exists() || file.getParentFile().exists();
+        if (reConnect()) {
+            return file.exists() || file.getParentFile().exists();
+        }
+        return false;
     }
 }
