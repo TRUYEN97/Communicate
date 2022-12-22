@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
@@ -53,7 +54,6 @@ public class PowerSwitch {
         String command = String.format("http://%s/outlet?a=ON", this.host);
         return powerSwitch(command) == 200;
     }
-    
 
     public boolean setOffAll() {
         String command = String.format("http://%s/outlet?a=OFF", this.host);
@@ -72,11 +72,12 @@ public class PowerSwitch {
 
     public int powerSwitch(String command) {
         HttpGet request = new HttpGet(command);
-        try {
-            request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-            HttpResponse response = HttpClientBuilder.create().build().execute(request);
-            addLog(response.getStatusLine().toString());
-            return response.getStatusLine().getStatusCode();
+        request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+        try ( CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+            try ( CloseableHttpResponse response = httpClient.execute(request)) {
+                addLog(response.getStatusLine().toString());
+                return response.getStatusLine().getStatusCode();
+            }
         } catch (IOException e) {
             e.printStackTrace();
             result.append("Exception: ").append(e.getLocalizedMessage());
