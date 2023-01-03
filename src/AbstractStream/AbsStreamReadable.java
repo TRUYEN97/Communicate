@@ -5,18 +5,16 @@
 package AbstractStream;
 
 import Time.WaitTime.AbsTime;
-import Time.WaitTime.Class.TimeS;
 import Communicate.IReadable;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Administrator
  */
-public abstract class AbsStreamReadable implements IReadable {
+public abstract class AbsStreamReadable implements IReadable, Closeable {
 
     protected InputStream reader;
     private StringBuffer stringResult;
@@ -30,15 +28,10 @@ public abstract class AbsStreamReadable implements IReadable {
         this.reader = reader;
     }
 
-    public boolean disConnect() {
-        try {
-            if (reader != null) {
-                this.reader.close();
-            }
-            return true;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return false;
+    @Override
+    public void close() throws IOException {
+        if (reader != null) {
+            this.reader.close();
         }
     }
 
@@ -71,16 +64,16 @@ public abstract class AbsStreamReadable implements IReadable {
                     if (isKeyWord(result.toString(), regex)) {
                         break;
                     }
-                }else{
+                } else {
                     Thread.sleep(100);
                 }
             }
             this.stringResult = result;
-            return result.toString().trim().isBlank()? null : result.toString().trim();
+            return result.toString().trim().isBlank() ? null : result.toString().trim();
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         } catch (InterruptedException ex) {
-            
+
         }
         return null;
     }

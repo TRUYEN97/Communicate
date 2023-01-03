@@ -4,15 +4,15 @@
  */
 package Communicate;
 
+import java.io.Closeable;
+
 /**
  *
  * @author Administrator
  */
-public interface IConnect {
+public interface IConnect extends Closeable {
 
-    boolean connect(String port, int baudrate);
-
-    boolean disConnect();
+    boolean connect(String pram1, int pram2);
 
     boolean isConnect();
 }
