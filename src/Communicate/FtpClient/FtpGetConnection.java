@@ -24,7 +24,7 @@ public class FtpGetConnection implements Closeable {
 
     public static FtpGetConnection getConnection(String host, int port, String user, String password) throws IOException {
         FtpGetConnection connection = new FtpGetConnection();
-        if (connection.connect(host, port) && connection.login(user, host)) {
+        if (connection.connect(host, port) && connection.login(user, password)) {
             return connection;
         }
         return null;
