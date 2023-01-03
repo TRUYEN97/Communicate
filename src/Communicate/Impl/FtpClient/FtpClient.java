@@ -33,15 +33,12 @@ public class FtpClient extends AbsShowException{
         this.password = password;
     }
 
-    public FtpClient getConnection(String host, int port, String user, String password) {
+    public static FtpClient getConnection(String host, int port, String user, String password) throws IOException {
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
             if (ftpconncetor == null) {
                 return null;
             }
             return new FtpClient(host, port, user, password);
-        } catch (Exception e) {
-            showException(e);
-            return null;
         }
     }
 
