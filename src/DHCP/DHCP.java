@@ -56,12 +56,8 @@ public class DHCP implements Runnable {
 
     public boolean init(File logPath) {
         DHCPPacket temp = new DHCPPacket();
-        try {
-            this.loger.begin(logPath, true);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return false;
-        }
+        this.loger.setFile(logPath);
+        this.loger.setSaveMemory(true);
         if (isNotHostAddress(this.dhcpHost)) {
             String mess = "The network card cannot be found to \"" + this.dhcpHost + "\"";
             JOptionPane.showMessageDialog(null, mess, "Tip",
@@ -116,7 +112,7 @@ public class DHCP implements Runnable {
                 dhcp = DHCPPacket.getPacket(pac);
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 String ip = dhcpData.getIP(mac);
-                System.out.println("DHCP requests: " + mac+ " - "+ip);
+                System.out.println("DHCP requests: " + mac + " - " + ip);
                 showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
                 if (ip == null) {
                     continue;
@@ -143,7 +139,7 @@ public class DHCP implements Runnable {
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
-                        loger.addLog("REQUEST", ip + " - "+ mac);
+                        loger.addLog("REQUEST", ip + " - " + mac);
                         loger.addLog("REQUEST", "dhcp request ok");
                         loger.addLog("*******************************************");
                     }

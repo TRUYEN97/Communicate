@@ -73,7 +73,7 @@ public class Cmd extends AbsCommunicate implements ISender, IReadStream {
     }
 
     @Override
-    public void close() throws IOException {
+    protected void closeThis() throws IOException {
         if (process != null) {
             process.destroy();
         }

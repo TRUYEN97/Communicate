@@ -69,13 +69,6 @@ public class ComPort extends AbsCommunicate implements ISender, IReadStream, ICo
         return returnValue;
     }
 
-    @Override
-    public void close() throws IOException {
-        closePort();
-        closeOutput();
-        closeInput();
-    }
-
     private void closePort() {
         if (isConnect()) {
             serialPort.closePort();
@@ -86,6 +79,12 @@ public class ComPort extends AbsCommunicate implements ISender, IReadStream, ICo
         if (out != null) {
             out.close();
         }
+    }
+
+    @Override
+    protected void closeThis() throws IOException {
+        closePort();
+        closeOutput();
     }
 
 }

@@ -4,9 +4,9 @@
  */
 package Communicate.Impl.Telnet;
 
-import Time.WaitTime.AbsTime;
 import AbstractStream.AbsStreamReadable;
 import AbstractStream.SubClass.ReadStream;
+import AbstractStream.SubClass.ReadStreamOverTime;
 import Communicate.AbsCommunicate;
 import Communicate.IConnect;
 import Communicate.IReadStream;
@@ -27,7 +27,7 @@ public class Telnet extends AbsCommunicate implements ISender, IReadStream, ICon
 
     public Telnet() {
         this.telnet = new TelnetClient();
-        this.input = new ReadStream();
+        this.input = new ReadStreamOverTime();
     }
 
     public Telnet(AbsStreamReadable readable) {
@@ -39,10 +39,13 @@ public class Telnet extends AbsCommunicate implements ISender, IReadStream, ICon
     public boolean connect(String host, int port) {
         try {
             telnet.connect(host, port);
-            input.setReader(telnet.getInputStream());
-            out = new PrintStream(telnet.getOutputStream());
-            this.host = host;
-            return true;
+            if (telnet.isConnected()) {
+                input.setReader(telnet.getInputStream());
+                out = new PrintStream(telnet.getOutputStream());
+                this.host = host;
+                return true;
+            }
+            return false;
         } catch (IOException ex) {
             showException(ex);
             return false;
@@ -63,10 +66,9 @@ public class Telnet extends AbsCommunicate implements ISender, IReadStream, ICon
     }
 
     @Override
-    public void close() throws IOException {
+    protected void closeThis() throws IOException {
         if (telnet != null) {
             telnet.disconnect();
         }
-        closeInput();
     }
 }

@@ -25,7 +25,7 @@ public abstract class AbsCommunicate extends AbsShowException implements ISender
     @Override
     public boolean setStreamReadable(AbsStreamReadable readable) {
         try {
-            closeInput();
+            close();
             this.input = readable;
             return false;
         } catch (IOException ex) {
@@ -86,10 +86,14 @@ public abstract class AbsCommunicate extends AbsShowException implements ISender
     public StringBuffer getStringResult() {
         return this.input.getStringResult();
     }
+    
+    protected abstract void closeThis() throws IOException;
 
-    protected void closeInput() throws IOException {
+    @Override
+    public void close() throws IOException {
         if (input != null) {
             input.close();
         }
+        closeThis();
     }
 }
