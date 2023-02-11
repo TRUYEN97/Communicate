@@ -29,6 +29,7 @@ import org.dhcp4java.DHCPResponseFactory;
  */
 public class DHCP implements Runnable {
 
+    private static volatile DHCP instance;
     private final MyLoger loger;
     private final DhcpData dhcpData;
     private String dhcpHost;
@@ -36,13 +37,36 @@ public class DHCP implements Runnable {
     private InetAddress host_Address;
     private DHCPOption[] commonOptions;
 
-    public DHCP() {
+    private DHCP() {
         this.loger = new MyLoger();
         this.dhcpData = DhcpData.getInstance();
+    }
+    
+    public static DHCP getgetInstance(){
+        DHCP ins = DHCP.instance;
+        if (ins == null) {
+            synchronized (DHCP.class) {
+                ins = DHCP.instance;
+                if (ins == null) {
+                    DHCP.instance = ins = new DHCP();
+                }
+            }
+        }
+        return ins;
     }
 
     public void setView(JTextArea view) {
         this.view = view;
+        showInfo();
+    }
+
+    private void showInfo() {
+        if (this.view != null && this.dhcpHost != null) {
+            String mess = String.format("////DHCP//////\r\nSet net IP: %s\r\nSet MAC Length: %s",
+                    this.dhcpHost,
+                    this.dhcpData.getMACLength());
+            this.view.setText(mess);
+        }
     }
 
     public boolean setNetIP(String netIp) {
@@ -51,7 +75,11 @@ public class DHCP implements Runnable {
             System.exit(0);
         }
         this.dhcpHost = netIp;
-        return this.dhcpData.setNetIP(netIp);
+        if (this.dhcpData.setNetIP(netIp)) {
+            showInfo();
+            return true;
+        }
+        return false;
     }
 
     public boolean init(File logPath) {
@@ -113,7 +141,8 @@ public class DHCP implements Runnable {
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 String ip = dhcpData.getIP(mac);
                 System.out.println("DHCP requests: " + mac + " - " + ip);
-                showMess(String.format("DHCP: %s\r\nIP: %s", mac, ip));
+                showMess(String.format("DHCP: %s\r\nIP: %s\r\nMAC length: %s",
+                        mac, ip, this.dhcpData.getMACLength()));
                 if (ip == null) {
                     continue;
                 }

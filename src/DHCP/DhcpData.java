@@ -50,7 +50,7 @@ public class DhcpData {
         String ip = this.netIP + id;
         try {
             String newMac = macFormat(mac);
-            if (newMac.length() != 16) {
+            if (newMac.length() != macLength) {
                 return false;
             }
             deleteIpOlder(ip);
