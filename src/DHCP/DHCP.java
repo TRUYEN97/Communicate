@@ -141,8 +141,7 @@ public class DHCP implements Runnable {
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 String ip = dhcpData.getIP(mac);
                 System.out.println("DHCP requests: " + mac + " - " + ip);
-                showMess(String.format("DHCP: %s\r\nIP: %s\r\nMAC length: %s",
-                        mac, ip, this.dhcpData.getMACLength()));
+                showInfo(mac, ip);
                 if (ip == null) {
                     continue;
                 }
@@ -181,6 +180,11 @@ public class DHCP implements Runnable {
         }
     }
 
+    private void showInfo(String mac, String ip) {
+        showMess(String.format("DHCP: %s\r\nIP: %s\r\nMAC length: %s",
+                mac, ip, this.dhcpData.getMACLength()));
+    }
+
     private void showMess(String mess) {
         if (view == null) {
             return;
@@ -198,6 +202,14 @@ public class DHCP implements Runnable {
             sb.append(hex);
         }
         return sb.toString();
+    }
+
+    public boolean setMacLenth(int macLength) {
+        if( this.dhcpData.setMacLength(macLength)){
+            showInfo();
+            return true;
+        }
+        return false;
     }
 
 }
