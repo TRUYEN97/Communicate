@@ -68,13 +68,13 @@ public abstract class AbsCommunicate extends AbsShowException implements ISender
     }
 
     @Override
-    public String readUntil(String regex) {
+    public String readUntil(String... regex) {
         return input.readUntil(regex);
     }
 
     @Override
-    public String readUntil(String regex, AbsTime tiker) {
-        return input.readUntil(regex, tiker);
+    public String readUntil(AbsTime tiker, String... regex) {
+        return input.readUntil(tiker, regex);
     }
 
     @Override

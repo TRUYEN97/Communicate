@@ -29,12 +29,13 @@ public class ReadStream extends AbsStreamReadable {
     }
 
     @Override
-    public String readUntil(String regex) {
-        return readUntil(regex, new TimeS(MAX));
+    public String readUntil(String... keywords) {
+        return readUntil(new TimeS(MAX), keywords );
     }
 
     @Override
     public String readLine() {
-        return readUntil("\n", new TimeS(MAX));
+        return readUntil(new TimeS(MAX), "\n");
     }
+
 }

@@ -22,7 +22,7 @@ public interface IReadable {
 
     String readAll(AbsTime tiker);
 
-    String readUntil(String regex);
+    String readUntil(AbsTime tiker, String... keywords);
 
-    String readUntil(String regex, AbsTime tiker);
+    String readUntil(String... keywords);
 }

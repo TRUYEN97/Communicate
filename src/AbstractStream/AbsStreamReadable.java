@@ -41,16 +41,16 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
 
     @Override
     public String readLine(AbsTime time) {
-        return readUntil("\n", time);
+        return readUntil( time,"\n");
     }
 
     @Override
     public String readAll(AbsTime tiker) {
-        return readUntil(null, tiker);
+        return readUntil(tiker);
     }
 
     @Override
-    public String readUntil(String regex, AbsTime tiker) {
+    public String readUntil(AbsTime tiker, String... keywords) {
         StringBuffer result;
         try {
             result = new StringBuffer();
@@ -61,7 +61,7 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
                         continue;
                     }
                     result.append(kiTu);
-                    if (isKeyWord(result.toString(), regex)) {
+                    if (isKeyWord(result.toString(), keywords)) {
                         break;
                     }
                 } else {
@@ -83,8 +83,15 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
         return stringResult;
     }
 
-    protected boolean isKeyWord(String result, String keyWord) {
-        return keyWord != null && result.endsWith(keyWord);
+    protected boolean isKeyWord(String result, String... keyWords) {
+        if (keyWords != null && result!= null && keyWords.length > 0) {
+            for (String keyWord : keyWords) {
+                if (!keyWord.isEmpty() && result.endsWith(keyWord)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected boolean stringNotNull(String string) {

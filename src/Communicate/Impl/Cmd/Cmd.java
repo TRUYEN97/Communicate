@@ -4,9 +4,7 @@
  */
 package Communicate.Impl.Cmd;
 
-import Time.WaitTime.AbsTime;
 import Communicate.ISender;
-import Time.WaitTime.Class.TimeS;
 import AbstractStream.AbsStreamReadable;
 import AbstractStream.SubClass.ReadStreamOverTime;
 import Communicate.AbsCommunicate;
@@ -32,22 +30,6 @@ public class Cmd extends AbsCommunicate implements ISender, IReadStream {
         this.input = reader;
         this.builder = new ProcessBuilder();
         this.builder.redirectErrorStream(true);
-    }
-
-    public boolean pingTo(String url, int count) {
-        String cmd = String.format("ping %s -n %d", url, count);
-        if (sendCommand(cmd)) {
-            return input.readUntil("TTL=", new TimeS(5)).contains("TTL=");
-        }
-        return false;
-    }
-
-    public boolean pingUntilConnect(String addr, AbsTime timer) {
-        String cmd = String.format("ping %s -t", addr);
-        if (sendCommand(cmd)) {
-            return input.readUntil("TTL=", timer).contains("TTL=");
-        }
-        return false;
     }
 
     @Override

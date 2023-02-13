@@ -44,16 +44,16 @@ public class ReadStreamOverTime extends AbsStreamReadable {
 
     @Override
     public String readAll() {
-        return readUntil(null);
+        return readUntil();
     }
 
     @Override
-    public String readUntil(String regex) {
+    public String readUntil(String... keywords) {
         StringBuilder data = new StringBuilder();
         String str;
         while (stringNotNull(str = readLine())) {
             data.append(str).append("\n");
-            if (isKeyWord(data.toString(), regex)) {
+            if (isKeyWord(data.toString(), keywords)) {
                 break;
             }
         }

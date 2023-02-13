@@ -27,7 +27,7 @@ public class Telnet extends AbsCommunicate implements ISender, IReadStream, ICon
 
     public Telnet() {
         this.telnet = new TelnetClient();
-        this.input = new ReadStreamOverTime();
+        this.input = new ReadStream();
     }
 
     public Telnet(AbsStreamReadable readable) {
