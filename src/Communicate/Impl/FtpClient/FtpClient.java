@@ -6,12 +6,16 @@ package Communicate.Impl.FtpClient;
 
 import Communicate.FtpClient.FtpGetConnection;
 import Communicate.AbsShowException;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import org.apache.commons.net.ftp.FTPClient;
 
@@ -19,7 +23,7 @@ import org.apache.commons.net.ftp.FTPClient;
  *
  * @author Administrator
  */
-public class FtpClient extends AbsShowException{
+public class FtpClient extends AbsShowException {
 
     private final String host;
     private final int port;
@@ -43,6 +47,9 @@ public class FtpClient extends AbsShowException{
     }
 
     public boolean upStringToFTP(String data, String ftpFile) {
+        if (data == null || ftpFile == null) {
+            return false;
+        }
         File file = new File(ftpFile);
         makeFtpDirectory(file.getParent());
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
@@ -66,6 +73,9 @@ public class FtpClient extends AbsShowException{
     }
 
     public boolean uploadFile(String localFile, String newFtpFile) {
+        if (localFile == null || newFtpFile == null) {
+            return false;
+        }
         File file = new File(newFtpFile);
         makeFtpDirectory(file.getParent());
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
@@ -80,7 +90,7 @@ public class FtpClient extends AbsShowException{
     }
 
     public boolean downloadFile(String FtpFile, String localFile) {
-        if (!checkFileFtpExists(FtpFile)) {
+        if (!checkFileFtpExists(FtpFile) || localFile == null) {
             return false;
         }
         File file = new File(localFile);
@@ -99,6 +109,9 @@ public class FtpClient extends AbsShowException{
     }
 
     public boolean renameFtpFile(String oldName, String newName) {
+        if (oldName == null || newName == null) {
+            return false;
+        }
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
             FTPClient ftpClient = ftpconncetor.getFTPClient();
             return ftpClient.rename(oldName, newName);
@@ -121,7 +134,10 @@ public class FtpClient extends AbsShowException{
         }
     }
 
-    private boolean makeFtpDirectory(String dir) {
+    public boolean makeFtpDirectory(String dir) {
+        if (dir == null) {
+            return false;
+        }
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
             FTPClient ftpClient = ftpconncetor.getFTPClient();
             return ftpClient.makeDirectory(dir);
@@ -131,11 +147,14 @@ public class FtpClient extends AbsShowException{
         }
     }
 
-    private boolean checkFileFtpExists(String filePath) {
+    public boolean checkFileFtpExists(String filePath) {
+        if (filePath == null) {
+            return false;
+        }
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
             FTPClient ftpClient = ftpconncetor.getFTPClient();
             try ( InputStream inputStream = ftpClient.retrieveFileStream(filePath)) {
-                return !(inputStream == null || ftpClient.getReplyCode() == 550);
+                return (inputStream != null && ftpClient.getReplyCode() != 550);
             }
         } catch (IOException ex) {
             showException(ex);
@@ -144,13 +163,13 @@ public class FtpClient extends AbsShowException{
     }
 
     public boolean checkFtpDirectoryExists(String dirPath) {
+        if (dirPath == null) {
+            return false;
+        }
         try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
             FTPClient ftpClient = ftpconncetor.getFTPClient();
             ftpClient.changeWorkingDirectory(dirPath);
-            if (ftpClient.getReplyCode() == 550) {
-                return false;
-            }
-            return true;
+            return ftpClient.getReplyCode() != 550;
         } catch (IOException ex) {
             showException(ex);
             return false;
@@ -164,4 +183,74 @@ public class FtpClient extends AbsShowException{
     private boolean isParentExists(File file) {
         return file.exists() || file.getParentFile().exists();
     }
+
+    public byte[] readByteFile(String ftpFolder, String ftpFileName) {
+        if (ftpFolder == null || ftpFileName == null) {
+            return null;
+        }
+        return readByteFile(String.format("%s/%s", ftpFolder, ftpFileName));
+    }
+
+    public byte[] readByteFile(String ftpFilepath) {
+        ftpFilepath = checkPath(ftpFilepath);
+        if (!checkFileFtpExists(ftpFilepath)) {
+            return null;
+        }
+        try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
+            FTPClient ftpClient = ftpconncetor.getFTPClient();
+            try ( InputStream in = ftpClient.retrieveFileStream(ftpFilepath)) {
+                return in.readAllBytes();
+            }
+        } catch (IOException ex) {
+            showException(ex);
+            return null;
+        }
+    }
+
+    public String readStringFile(String ftpFolder, String ftpFileName) {
+        if (ftpFolder == null || ftpFileName == null) {
+            return null;
+        }
+        return readStringFile(String.format("%s/%s", ftpFolder, ftpFileName));
+    }
+
+    public String readStringFile(String ftpFilepath) {
+        if (ftpFilepath == null) {
+            return null;
+        }
+        ftpFilepath = checkPath(ftpFilepath);
+        if (!checkFileFtpExists(ftpFilepath)) {
+            return null;
+        }
+        try ( FtpGetConnection ftpconncetor = FtpGetConnection.getConnection(host, port, user, password)) {
+            FTPClient ftpClient = ftpconncetor.getFTPClient();
+            StringBuilder builder = new StringBuilder();
+            try ( InputStreamReader input = new InputStreamReader(ftpClient.retrieveFileStream(ftpFilepath))) {
+                if (input == null) {
+                    return null;
+                }
+                try ( BufferedReader buffer = new BufferedReader(input)) {
+                    String line;
+                    if ((line = buffer.readLine()) != null) {
+                        builder.append(line);
+                        while ((line = buffer.readLine()) != null) {
+                            builder.append("\r\n").append(line);
+                        }
+                    }
+                }
+            }
+            return builder.toString();
+        } catch (IOException ex) {
+            showException(ex);
+            return null;
+        }
+    }
+
+    private String checkPath(String ftpFilepath) {
+        ftpFilepath = ftpFilepath.replaceAll("//", "/");
+        ftpFilepath = ftpFilepath.replaceAll("\\\\/", "\\\\");
+        ftpFilepath = ftpFilepath.replaceAll("\\\\\\\\", "\\\\");
+        return ftpFilepath;
+    }
+
 }
