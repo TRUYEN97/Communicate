@@ -41,8 +41,8 @@ public class DHCP implements Runnable {
         this.loger = new MyLoger();
         this.dhcpData = DhcpData.getInstance();
     }
-    
-    public static DHCP getgetInstance(){
+
+    public static DHCP getgetInstance() {
         DHCP ins = DHCP.instance;
         if (ins == null) {
             synchronized (DHCP.class) {
@@ -94,7 +94,7 @@ public class DHCP implements Runnable {
         }
         try {
             temp.setOptionAsInetAddress(DHO_DHCP_SERVER_IDENTIFIER, this.host_Address);
-            temp.setOptionAsInt(DHO_DHCP_LEASE_TIME, 3600 * 24 * 14);
+            temp.setOptionAsInt(DHO_DHCP_LEASE_TIME, 3600 * 24 * 7);
             temp.setOptionAsInetAddress(DHO_SUBNET_MASK, "255.255.255.0");
             temp.setOptionAsInetAddress(DHO_ROUTERS, "0.0.0.0");
             this.commonOptions = temp.getOptionsArray();
@@ -145,11 +145,10 @@ public class DHCP implements Runnable {
                 if (ip == null) {
                     continue;
                 }
-                byte rev = dhcp.getDHCPMessageType();
-                switch (rev) {
+                DHCPPacket d;
+                DatagramPacket dp;
+                switch (dhcp.getDHCPMessageType()) {
                     case DHCPConstants.DHCPDISCOVER -> {
-                        DatagramPacket dp;
-                        DHCPPacket d;
                         d = DHCPResponseFactory.makeDHCPOffer(dhcp, InetAddress.getByName(ip), 3600 * 24 * 7, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
@@ -161,8 +160,6 @@ public class DHCP implements Runnable {
                         loger.addLog("DISCOVER", "DHCP SOCK ADDRESS: " + dp.getSocketAddress().toString());
                     }
                     case DHCPConstants.DHCPREQUEST -> {
-                        DHCPPacket d;
-                        DatagramPacket dp;
                         d = DHCPResponseFactory.makeDHCPAck(dhcp, InetAddress.getByName(ip), 3600 * 24 * 7, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
@@ -205,7 +202,7 @@ public class DHCP implements Runnable {
     }
 
     public boolean setMacLenth(int macLength) {
-        if( this.dhcpData.setMacLength(macLength)){
+        if (this.dhcpData.setMacLength(macLength)) {
             showInfo();
             return true;
         }
