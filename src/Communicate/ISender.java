@@ -4,11 +4,13 @@
  */
 package Communicate;
 
+import java.io.Closeable;
+
 /**
  *
  * @author Administrator
  */
-public interface ISender {
+public interface ISender extends Closeable{
     
     boolean sendCommand(String command);
     

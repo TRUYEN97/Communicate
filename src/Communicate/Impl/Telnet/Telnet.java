@@ -6,12 +6,10 @@ package Communicate.Impl.Telnet;
 
 import AbstractStream.AbsStreamReadable;
 import AbstractStream.SubClass.ReadStream;
-import AbstractStream.SubClass.ReadStreamOverTime;
 import Communicate.AbsCommunicate;
 import Communicate.IConnect;
 import Communicate.IReadStream;
 import Communicate.ISender;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintStream;
 import org.apache.commons.net.telnet.TelnetClient;
@@ -20,7 +18,7 @@ import org.apache.commons.net.telnet.TelnetClient;
  *
  * @author Administrator
  */
-public class Telnet extends AbsCommunicate implements ISender, IReadStream, IConnect, Closeable {
+public class Telnet extends AbsCommunicate implements ISender, IReadStream, IConnect {
 
     private final TelnetClient telnet;
     private String host;

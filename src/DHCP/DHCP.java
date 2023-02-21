@@ -5,6 +5,7 @@
 package DHCP;
 
 import MyLoger.MyLoger;
+import Time.TimeBase;
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -33,13 +34,20 @@ public class DHCP implements Runnable {
     private final MyLoger loger;
     private final DhcpData dhcpData;
     private String dhcpHost;
+    private File logdir;
     private JTextArea view;
     private InetAddress host_Address;
     private DHCPOption[] commonOptions;
+    private static final int TIME_DHCP = 3600 * 24 * 7;
+    private Thread thread;
+    private final Arp arp;
+    private final TimeBase timeBase;
 
     private DHCP() {
         this.loger = new MyLoger();
         this.dhcpData = DhcpData.getInstance();
+        this.arp = new Arp();
+        this.timeBase = new TimeBase();
     }
 
     public static DHCP getgetInstance() {
@@ -84,7 +92,7 @@ public class DHCP implements Runnable {
 
     public boolean init(File logPath) {
         DHCPPacket temp = new DHCPPacket();
-        this.loger.setFile(logPath);
+        this.logdir = logPath;
         this.loger.setSaveMemory(true);
         if (isNotHostAddress(this.dhcpHost)) {
             String mess = "The network card cannot be found to \"" + this.dhcpHost + "\"";
@@ -94,7 +102,7 @@ public class DHCP implements Runnable {
         }
         try {
             temp.setOptionAsInetAddress(DHO_DHCP_SERVER_IDENTIFIER, this.host_Address);
-            temp.setOptionAsInt(DHO_DHCP_LEASE_TIME, 3600 * 24 * 7);
+            temp.setOptionAsInt(DHO_DHCP_LEASE_TIME, TIME_DHCP);
             temp.setOptionAsInetAddress(DHO_SUBNET_MASK, "255.255.255.0");
             temp.setOptionAsInetAddress(DHO_ROUTERS, "0.0.0.0");
             this.commonOptions = temp.getOptionsArray();
@@ -130,9 +138,7 @@ public class DHCP implements Runnable {
 
     @Override
     public void run() {
-        try {
-            DatagramSocket socket;
-            socket = new DatagramSocket(DHCPConstants.BOOTP_REQUEST_PORT, host_Address);
+        try ( DatagramSocket socket = new DatagramSocket(DHCPConstants.BOOTP_REQUEST_PORT, host_Address)) {
             DatagramPacket pac = new DatagramPacket(new byte[1500], 1500);
             DHCPPacket dhcp;
             while (true) {
@@ -147,12 +153,15 @@ public class DHCP implements Runnable {
                 }
                 DHCPPacket d;
                 DatagramPacket dp;
+                InetAddress address = InetAddress.getByName(ip);
                 switch (dhcp.getDHCPMessageType()) {
                     case DHCPConstants.DHCPDISCOVER -> {
-                        d = DHCPResponseFactory.makeDHCPOffer(dhcp, InetAddress.getByName(ip), 3600 * 24 * 7, host_Address, "", commonOptions);
+                        d = DHCPResponseFactory.makeDHCPOffer(dhcp, address, TIME_DHCP, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
+                        String logPath = String.format("%s/%s.txt", logdir.getPath(), this.timeBase.getDate());
+                        loger.setFile(new File(logPath));
                         loger.addLog("==============================================");
                         loger.addLog(host_Address.getHostAddress());
                         loger.addLog("DISCOVER", "DHCP PORT: " + dp.getPort());
@@ -160,10 +169,13 @@ public class DHCP implements Runnable {
                         loger.addLog("DISCOVER", "DHCP SOCK ADDRESS: " + dp.getSocketAddress().toString());
                     }
                     case DHCPConstants.DHCPREQUEST -> {
-                        d = DHCPResponseFactory.makeDHCPAck(dhcp, InetAddress.getByName(ip), 3600 * 24 * 7, host_Address, "", commonOptions);
+                        d = DHCPResponseFactory.makeDHCPAck(dhcp, address, TIME_DHCP, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
+                        sendARP();
+                        String logPath = String.format("%s/%s.txt", logdir.getPath(), this.timeBase.getDate());
+                        loger.setFile(new File(logPath));
                         loger.addLog("REQUEST", ip + " - " + mac);
                         loger.addLog("REQUEST", "dhcp request ok");
                         loger.addLog("*******************************************");
@@ -209,4 +221,10 @@ public class DHCP implements Runnable {
         return false;
     }
 
+    private void sendARP() {
+        if (this.thread == null || !this.thread.isAlive()) {
+            this.thread = new Thread(this.arp);
+            this.thread.start();
+        }
+    }
 }
