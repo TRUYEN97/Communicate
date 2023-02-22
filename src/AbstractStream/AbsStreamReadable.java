@@ -64,16 +64,12 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
                     if (isKeyWord(result.toString(), keywords)) {
                         break;
                     }
-                } else {
-                    Thread.sleep(100);
                 }
             }
             this.stringResult = result;
             return result.toString().trim().isBlank() ? null : result.toString().trim();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
-        } catch (InterruptedException ex) {
-
         }
         return null;
     }

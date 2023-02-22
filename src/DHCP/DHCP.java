@@ -32,19 +32,21 @@ public class DHCP implements Runnable {
 
     private static volatile DHCP instance;
     private final MyLoger loger;
+    private final MyLoger macRequestLog;
     private final DhcpData dhcpData;
     private String dhcpHost;
     private File logdir;
     private JTextArea view;
     private InetAddress host_Address;
     private DHCPOption[] commonOptions;
-    private static final int TIME_DHCP = 3600 * 24 * 7;
+    private int leaseTime = 3600 * 24 * 7;
     private Thread thread;
     private final Arp arp;
     private final TimeBase timeBase;
 
     private DHCP() {
         this.loger = new MyLoger();
+        this.macRequestLog = new MyLoger();
         this.dhcpData = DhcpData.getInstance();
         this.arp = new Arp();
         this.timeBase = new TimeBase();
@@ -70,15 +72,16 @@ public class DHCP implements Runnable {
 
     private void showInfo() {
         if (this.view != null && this.dhcpHost != null) {
-            String mess = String.format("////DHCP//////\r\nSet net IP: %s\r\nSet MAC Length: %s",
+            String mess = String.format("////DHCP//////\r\nSet net IP: %s\r\nSet MAC Length: %s\r\nLease time: %s",
                     this.dhcpHost,
-                    this.dhcpData.getMACLength());
+                    this.dhcpData.getMACLength(),
+                    this.leaseTime);
             this.view.setText(mess);
         }
     }
 
     public boolean setNetIP(String netIp) {
-        if (netIp == null || !netIp.matches("\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b")) {
+        if (!MacUtil.isIPAddr(netIp)) {
             JOptionPane.showMessageDialog(null, "Net IP is null or it's not addr! \r\n" + netIp);
             System.exit(0);
         }
@@ -90,10 +93,17 @@ public class DHCP implements Runnable {
         return false;
     }
 
-    public boolean init(File logPath) {
+    public boolean init(File logPath, int leaseTime) {
+        if (leaseTime <= 0) {
+            return false;
+        }
+        this.leaseTime = leaseTime;
         DHCPPacket temp = new DHCPPacket();
         this.logdir = logPath;
         this.loger.setSaveMemory(true);
+        this.macRequestLog.setSaveMemory(true);
+        this.macRequestLog.setFile(new File(String.format("%s/macRequest.txt", logdir.getPath())));
+        this.macRequestLog.clear();
         if (isNotHostAddress(this.dhcpHost)) {
             String mess = "The network card cannot be found to \"" + this.dhcpHost + "\"";
             JOptionPane.showMessageDialog(null, mess, "Tip",
@@ -102,7 +112,7 @@ public class DHCP implements Runnable {
         }
         try {
             temp.setOptionAsInetAddress(DHO_DHCP_SERVER_IDENTIFIER, this.host_Address);
-            temp.setOptionAsInt(DHO_DHCP_LEASE_TIME, TIME_DHCP);
+            temp.setOptionAsInt(DHO_DHCP_LEASE_TIME, leaseTime);
             temp.setOptionAsInetAddress(DHO_SUBNET_MASK, "255.255.255.0");
             temp.setOptionAsInetAddress(DHO_ROUTERS, "0.0.0.0");
             this.commonOptions = temp.getOptionsArray();
@@ -111,6 +121,10 @@ public class DHCP implements Runnable {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean init(File logPath) {
+        return init(logPath, leaseTime);
     }
 
     private boolean isNotHostAddress(String dhcpHost) {
@@ -146,7 +160,9 @@ public class DHCP implements Runnable {
                 dhcp = DHCPPacket.getPacket(pac);
                 String mac = bytesToHex(dhcp.getChaddr()).substring(0, 12);
                 String ip = dhcpData.getIP(mac);
-                System.out.println("DHCP requests: " + mac + " - " + ip);
+                String macRequest = String.format("DHCP requests: %s - %s", mac, ip);
+                System.out.println(macRequest);
+                this.macRequestLog.addLog(macRequest);
                 showInfo(mac, ip);
                 if (ip == null) {
                     continue;
@@ -156,7 +172,7 @@ public class DHCP implements Runnable {
                 InetAddress address = InetAddress.getByName(ip);
                 switch (dhcp.getDHCPMessageType()) {
                     case DHCPConstants.DHCPDISCOVER -> {
-                        d = DHCPResponseFactory.makeDHCPOffer(dhcp, address, TIME_DHCP, host_Address, "", commonOptions);
+                        d = DHCPResponseFactory.makeDHCPOffer(dhcp, address, leaseTime, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
@@ -169,7 +185,7 @@ public class DHCP implements Runnable {
                         loger.addLog("DISCOVER", "DHCP SOCK ADDRESS: " + dp.getSocketAddress().toString());
                     }
                     case DHCPConstants.DHCPREQUEST -> {
-                        d = DHCPResponseFactory.makeDHCPAck(dhcp, address, TIME_DHCP, host_Address, "", commonOptions);
+                        d = DHCPResponseFactory.makeDHCPAck(dhcp, address, leaseTime, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
@@ -190,8 +206,8 @@ public class DHCP implements Runnable {
     }
 
     private void showInfo(String mac, String ip) {
-        showMess(String.format("DHCP: %s\r\nIP: %s\r\nMAC length: %s",
-                mac, ip, this.dhcpData.getMACLength()));
+        showMess(String.format("DHCP: %s\r\nIP: %s\r\nMAC length: %s\r\nLease time: %s",
+                mac, ip, this.dhcpData.getMACLength(), leaseTime));
     }
 
     private void showMess(String mess) {

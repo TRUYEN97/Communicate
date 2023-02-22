@@ -18,7 +18,6 @@ public class Arp implements Runnable {
             if(cmd.sendCommand("arp -d")){
                 System.out.println(cmd.readAll());
             }
-            Thread.sleep(1000);
         } catch (Exception e) {
             e.printStackTrace();
         }
