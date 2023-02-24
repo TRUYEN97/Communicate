@@ -16,15 +16,17 @@ import java.util.Map;
 public class DhcpData {
 
     private static volatile DhcpData instance;
+    private final Map<String, Integer> macIDs;
     private final List<String> macs;
     private String netIP;
     private int macLength;
 
     private DhcpData() {
         this.macLength = 17;
+        this.macIDs = new HashMap<>();
         this.macs = new ArrayList<>();
-        for (int i = 0; i < 256; i++) {
-            this.macs.add(null);
+        for (int i = 0; i < 255; i++) {
+            macs.add(null);
         }
     }
 
@@ -49,7 +51,7 @@ public class DhcpData {
         return ins;
     }
 
-    public boolean put(String mac, int id) {
+    public synchronized boolean put(String mac, int id) {
         try {
             if (id < 0 || id > 255 || mac == null) {
                 return false;
@@ -58,7 +60,8 @@ public class DhcpData {
             if (mac == null) {
                 return false;
             }
-            this.macs.add(id, mac);
+            resetMACInfo(mac, id);
+            addMacID(mac, id);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,11 +69,27 @@ public class DhcpData {
         }
     }
 
+    private void addMacID(String mac, int id) {
+        this.macIDs.put(mac, id);
+        this.macs.add(id, mac);
+    }
+
+    private void resetMACInfo(String mac, int id) {
+        Integer otherID = this.macIDs.get(mac);
+        if (otherID != null && otherID != id) {
+            String otherMac = this.macs.get(otherID);
+            if (otherMac != null) {
+                this.macIDs.remove(otherMac);
+                this.macs.add(otherID, null);
+            }
+        }
+    }
+
     public String getIP(String mac) {
         if (mac == null || (mac = MacUtil.macFormat(mac, macLength)) == null) {
             return null;
         }
-        int id = this.macs.indexOf(mac);
+        Integer id = this.macIDs.get(mac);
         return createIp(id);
     }
 
@@ -88,8 +107,8 @@ public class DhcpData {
         return macLength;
     }
 
-    private String createIp(int id) {
-        if (id < 0 || id > 255) {
+    private String createIp(Integer id) {
+        if (id == null || id < 0 || id > 255) {
             return null;
         }
         return String.format("%s.%s", this.netIP, id);

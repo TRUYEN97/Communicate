@@ -15,9 +15,10 @@ public class Arp implements Runnable {
     @Override
     public void run() {
         try ( Cmd cmd = new Cmd()) {
-            if(cmd.sendCommand("arp -d")){
+            if (cmd.sendCommand("arp -d")) {
                 System.out.println(cmd.readAll());
             }
+            Thread.sleep(500);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -27,12 +27,21 @@ public abstract class AbsCommunicate extends AbsShowException implements ISender
         try {
             close();
             this.input = readable;
-            return false;
+            return true;
         } catch (IOException ex) {
             showException(ex);
             return false;
         }
     }
+
+    @Override
+    public void setDebug(boolean debug) {
+        super.setDebug(debug);
+        if (input != null) {
+            this.input.setDebug(debug);
+        }
+    }
+    
 
     @Override
     public boolean sendCommand(String command) {

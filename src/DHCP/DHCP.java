@@ -102,7 +102,6 @@ public class DHCP implements Runnable {
         this.logdir = logPath;
         this.loger.setSaveMemory(true);
         this.macRequestLog.setSaveMemory(true);
-        this.macRequestLog.setFile(new File(String.format("%s/macRequest.txt", logdir.getPath())));
         this.macRequestLog.clear();
         if (isNotHostAddress(this.dhcpHost)) {
             String mess = "The network card cannot be found to \"" + this.dhcpHost + "\"";
@@ -162,6 +161,8 @@ public class DHCP implements Runnable {
                 String ip = dhcpData.getIP(mac);
                 String macRequest = String.format("DHCP requests: %s - %s", mac, ip);
                 System.out.println(macRequest);
+                this.macRequestLog.setFile(new File(String.format("%s/MacRequest/%s.txt",
+                        logdir.getPath(), this.timeBase.getDate())));
                 this.macRequestLog.addLog(macRequest);
                 showInfo(mac, ip);
                 if (ip == null) {
@@ -170,14 +171,14 @@ public class DHCP implements Runnable {
                 DHCPPacket d;
                 DatagramPacket dp;
                 InetAddress address = InetAddress.getByName(ip);
+                String logPath = String.format("%s/MACIP/%s.txt", logdir.getPath(), this.timeBase.getDate());
+                loger.setFile(new File(logPath));
                 switch (dhcp.getDHCPMessageType()) {
                     case DHCPConstants.DHCPDISCOVER -> {
                         d = DHCPResponseFactory.makeDHCPOffer(dhcp, address, leaseTime, host_Address, "", commonOptions);
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
-                        String logPath = String.format("%s/%s.txt", logdir.getPath(), this.timeBase.getDate());
-                        loger.setFile(new File(logPath));
                         loger.addLog("==============================================");
                         loger.addLog(host_Address.getHostAddress());
                         loger.addLog("DISCOVER", "DHCP PORT: " + dp.getPort());
@@ -189,12 +190,10 @@ public class DHCP implements Runnable {
                         byte[] res = d.serialize();
                         dp = new DatagramPacket(res, res.length, InetAddress.getByName("255.255.255.255"), DHCPConstants.BOOTP_REPLY_PORT);
                         socket.send(dp);
-                        sendARP();
-                        String logPath = String.format("%s/%s.txt", logdir.getPath(), this.timeBase.getDate());
-                        loger.setFile(new File(logPath));
                         loger.addLog("REQUEST", ip + " - " + mac);
                         loger.addLog("REQUEST", "dhcp request ok");
                         loger.addLog("*******************************************");
+                        sendARP();
                     }
                 }
             }

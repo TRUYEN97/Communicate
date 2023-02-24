@@ -4,6 +4,7 @@
  */
 package AbstractStream;
 
+import Communicate.AbsShowException;
 import Time.WaitTime.AbsTime;
 import Communicate.IReadable;
 import java.io.Closeable;
@@ -14,7 +15,7 @@ import java.io.InputStream;
  *
  * @author Administrator
  */
-public abstract class AbsStreamReadable implements IReadable, Closeable {
+public abstract class AbsStreamReadable extends AbsShowException implements IReadable, Closeable {
 
     protected InputStream reader;
     private StringBuffer stringResult;
@@ -41,7 +42,7 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
 
     @Override
     public String readLine(AbsTime time) {
-        return readUntil( time,"\n");
+        return readUntil(time, "\n");
     }
 
     @Override
@@ -51,9 +52,8 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
 
     @Override
     public String readUntil(AbsTime tiker, String... keywords) {
-        StringBuffer result;
         try {
-            result = new StringBuffer();
+            StringBuffer result = new StringBuffer();
             char kiTu;
             while (tiker.onTime() && reader != null) {
                 if (reader.available() > 0) {
@@ -64,14 +64,16 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
                     if (isKeyWord(result.toString(), keywords)) {
                         break;
                     }
+                } else {
+                    Thread.sleep(100);
                 }
             }
             this.stringResult = result;
             return result.toString().trim().isBlank() ? null : result.toString().trim();
         } catch (Exception ex) {
-            System.err.println(ex.getMessage());
+            showException(ex);
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -80,7 +82,7 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
     }
 
     protected boolean isKeyWord(String result, String... keyWords) {
-        if (keyWords != null && result!= null && keyWords.length > 0) {
+        if (keyWords != null && result != null && keyWords.length > 0) {
             for (String keyWord : keyWords) {
                 if (!keyWord.isEmpty() && result.endsWith(keyWord)) {
                     return true;
@@ -101,7 +103,7 @@ public abstract class AbsStreamReadable implements IReadable, Closeable {
                 reader.read();
             }
         } catch (IOException ex) {
-            System.err.println(ex.getMessage());
+            showException(ex);
         }
     }
 }
