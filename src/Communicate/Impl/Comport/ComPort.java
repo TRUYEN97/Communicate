@@ -25,6 +25,9 @@ public class ComPort extends AbsCommunicate implements ISender, IReadStream, ICo
 
     @Override
     public synchronized boolean connect(String port, int baudrate) {
+        if (port == null) {
+            return false;
+        }
         for (String commPort : getCommPorts()) {
             if (commPort.equalsIgnoreCase(port)) {
                 return openComm(port, baudrate);
