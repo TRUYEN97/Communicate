@@ -5,6 +5,8 @@
 package AbstractStream.SubClass;
 
 import AbstractStream.AbsStreamReadable;
+import Time.WaitTime.AbsTime;
+import Time.WaitTime.Class.TimeH;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,27 +39,29 @@ public class ReadStreamOverTime extends AbsStreamReadable {
         try {
             return scanner.readLine();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            showException(ex);
             return null;
         }
     }
 
     @Override
     public String readAll() {
-        return readUntil();
+        return readAll(new TimeH(MAX_TIME));
+    }
+
+    @Override
+    public String readAll(AbsTime tiker) {
+        StringBuilder data = new StringBuilder();
+        String str;
+        while (tiker.onTime() && stringNotNull(str = readLine())) {
+            data.append(str).append("\r\n");
+        }
+        return data.toString();
     }
 
     @Override
     public String readUntil(String... keywords) {
-        StringBuilder data = new StringBuilder();
-        String str;
-        while (stringNotNull(str = readLine())) {
-            data.append(str).append("\n");
-            if (isKeyWord(data.toString(), keywords)) {
-                break;
-            }
-        }
-        return data.toString();
+        return readUntil(new TimeH(MAX_TIME), keywords);
     }
 
 }

@@ -17,6 +17,7 @@ import java.io.InputStream;
  */
 public abstract class AbsStreamReadable extends AbsShowException implements IReadable, Closeable {
 
+    protected static final int MAX_TIME = Integer.MAX_VALUE;
     protected InputStream reader;
     private StringBuffer stringResult;
 
@@ -54,13 +55,13 @@ public abstract class AbsStreamReadable extends AbsShowException implements IRea
     public String readUntil(AbsTime tiker, String... keywords) {
         try {
             StringBuffer result = new StringBuffer();
-            char kiTu;
+            char charIn;
             while (tiker.onTime() && reader != null) {
                 if (reader.available() > 0) {
-                    if ((kiTu = (char) reader.read()) == -1) {
+                    if ((charIn = (char) reader.read()) == -1) {
                         continue;
                     }
-                    result.append(kiTu);
+                    result.append(charIn);
                     if (isKeyWord(result.toString(), keywords)) {
                         break;
                     }
@@ -75,7 +76,7 @@ public abstract class AbsStreamReadable extends AbsShowException implements IRea
             return null;
         }
     }
-
+    
     @Override
     public StringBuffer getStringResult() {
         return stringResult;

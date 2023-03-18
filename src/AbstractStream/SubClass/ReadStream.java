@@ -14,8 +14,6 @@ import java.io.InputStream;
  */
 public class ReadStream extends AbsStreamReadable {
 
-    private static final int MAX = Integer.MAX_VALUE;
-
     public ReadStream(InputStream reader) {
         super(reader);
     }
@@ -25,17 +23,17 @@ public class ReadStream extends AbsStreamReadable {
     
     @Override
     public String readAll() {
-        return readAll(new TimeS(MAX));
+        return readAll(new TimeS(MAX_TIME));
     }
 
     @Override
     public String readUntil(String... keywords) {
-        return readUntil(new TimeS(MAX), keywords );
+        return readUntil(new TimeS(MAX_TIME), keywords );
     }
 
     @Override
     public String readLine() {
-        return readUntil(new TimeS(MAX), "\n");
+        return readLine(new TimeS(MAX_TIME));
     }
 
 }

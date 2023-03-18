@@ -6,9 +6,11 @@ package Communicate.Impl.Cmd;
 
 import Communicate.ISender;
 import AbstractStream.AbsStreamReadable;
+import AbstractStream.SubClass.ReadStream;
 import AbstractStream.SubClass.ReadStreamOverTime;
 import Communicate.AbsCommunicate;
 import Communicate.IReadStream;
+import Time.WaitTime.Class.TimeS;
 import java.io.IOException;
 
 /**
