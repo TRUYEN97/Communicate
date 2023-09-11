@@ -85,7 +85,7 @@ public class DhcpData {
         }
     }
 
-    public String getIP(String mac) {
+    public synchronized String getIP(String mac) {
         if (mac == null || (mac = MacUtil.macFormat(mac, macLength)) == null) {
             return null;
         }

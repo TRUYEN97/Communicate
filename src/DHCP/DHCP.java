@@ -182,8 +182,7 @@ public class DHCP implements Runnable {
                         loger.addLog("==============================================");
                         loger.addLog(host_Address.getHostAddress());
                         loger.addLog("DISCOVER", "DHCP PORT: " + dp.getPort());
-                        loger.addLog("DISCOVER", "DHCP ADDRESS: " + dp.getAddress().toString());
-                        loger.addLog("DISCOVER", "DHCP SOCK ADDRESS: " + dp.getSocketAddress().toString());
+                        loger.addLog("DISCOVER", "MAC: " + mac);
                     }
                     case DHCPConstants.DHCPREQUEST -> {
                         d = DHCPResponseFactory.makeDHCPAck(dhcp, address, leaseTime, host_Address, "", commonOptions);
