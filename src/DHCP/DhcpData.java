@@ -16,18 +16,19 @@ import java.util.Map;
 public class DhcpData {
 
     private static volatile DhcpData instance;
-    private final Map<String, Integer> macIDs;
-    private final List<String> macs;
+
+    static {
+        instance = new DhcpData();
+    }
+    private final Map<String, String> macIps;
+    private final Map<String, String> ipMacs;
     private String netIP;
     private int macLength;
 
     private DhcpData() {
         this.macLength = 17;
-        this.macIDs = new HashMap<>();
-        this.macs = new ArrayList<>();
-        for (int i = 0; i < 255; i++) {
-            macs.add(null);
-        }
+        this.macIps = new HashMap<>();
+        this.ipMacs = new HashMap<>();
     }
 
     public boolean setMacLength(int macLength) {
@@ -39,16 +40,7 @@ public class DhcpData {
     }
 
     public static DhcpData getInstance() {
-        DhcpData ins = DhcpData.instance;
-        if (ins == null) {
-            synchronized (DhcpData.class) {
-                ins = DhcpData.instance;
-                if (ins == null) {
-                    DhcpData.instance = ins = new DhcpData();
-                }
-            }
-        }
-        return ins;
+        return instance;
     }
 
     public synchronized boolean put(String mac, int id) {
@@ -60,8 +52,12 @@ public class DhcpData {
             if (mac == null) {
                 return false;
             }
-            resetMACInfo(mac, id);
-            addMacID(mac, id);
+            String ip = createIp(id);
+            if (ip == null) {
+                return false;
+            }
+            resetMACInfo(mac, ip);
+            addMacIp(mac, ip);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,28 +65,38 @@ public class DhcpData {
         }
     }
 
-    private void addMacID(String mac, int id) {
-        this.macIDs.put(mac, id);
-        this.macs.add(id, mac);
+    private boolean addMacIp(String mac, String ip) {
+        if (mac == null || ip == null) {
+            return false;
+        }
+        String macOld = this.ipMacs.put(ip, mac);
+        if (macOld != null) {
+            this.macIps.remove(macOld);
+        }
+        this.macIps.put(mac, ip);
+        return true;
     }
 
-    private void resetMACInfo(String mac, int id) {
-        Integer otherID = this.macIDs.get(mac);
-        if (otherID != null && otherID != id) {
-            String otherMac = this.macs.get(otherID);
-            if (otherMac != null) {
-                this.macIDs.remove(otherMac);
-                this.macs.add(otherID, null);
-            }
+    private void resetMACInfo(String mac, String ip) {
+        if (this.ipMacs.containsKey(ip)) {
+            this.ipMacs.remove(ip);
+        } else if (this.macIps.containsKey(mac)) {
+            this.ipMacs.remove(mac);
         }
     }
 
-    public synchronized String getIP(String mac) {
+    public synchronized String getIP(String mac) throws Exception {
         if (mac == null || (mac = MacUtil.macFormat(mac, macLength)) == null) {
+            throw new Exception(String.format("invalid MAC format. MAC is %s", mac));
+        }
+        return this.macIps.get(mac);
+    }
+    
+    public synchronized String getMAC(String ip){
+        if (ip == null) {
             return null;
         }
-        Integer id = this.macIDs.get(mac);
-        return createIp(id);
+        return this.ipMacs.get(ip);
     }
 
     public boolean setNetIP(String netIp) {
